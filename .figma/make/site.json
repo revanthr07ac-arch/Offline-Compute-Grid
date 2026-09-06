@@ -1,0 +1,10 @@
+{
+  "description": "Enables travelers to create engaging blog posts with inline image galleries and easy social sharing to showcase their journeys effectively.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
