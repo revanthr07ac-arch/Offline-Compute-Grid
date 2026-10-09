@@ -1,3 +1,4 @@
+import React from "react";
 import { ChevronLeft, MoreVertical, PauseCircle, XCircle } from "lucide-react";
 
 interface TaskData {
@@ -119,7 +120,16 @@ interface TaskDetailPageProps {
 }
 
 export default function TaskDetailPage({ taskId, onBack }: TaskDetailPageProps) {
-  const task = TASK_MAP[taskId] ?? DEFAULT_TASK;
+  const [task, setTask] = React.useState<TaskData | null>(null);
+
+  React.useEffect(() => {
+    fetch(`/api/tasks/${taskId}`)
+      .then(res => res.json())
+      .then(data => setTask(data))
+      .catch(err => console.error("Failed to fetch task", err));
+  }, [taskId]);
+
+  if (!task) return <div style={{ padding: 24 }}>Loading task details...</div>;
   const priority = PRIORITY_STYLES[task.priority] ?? PRIORITY_STYLES.medium;
 
   const statusBg =

@@ -16,16 +16,10 @@ export default function VerifyEmailPage({ email, onVerified, onBack }: VerifyEma
   useEffect(() => {
     if (countdown <= 0) return;
     const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
+      setCountdown((prev) => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [countdown > 0]);
 
   const handleDigitChange = (index: number, value: string) => {
     const char = value.replace(/\D/g, "").slice(-1);
@@ -59,15 +53,6 @@ export default function VerifyEmailPage({ email, onVerified, onBack }: VerifyEma
   const handleResend = () => {
     if (countdown > 0) return;
     setCountdown(60);
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
   };
 
   const handleVerify = () => {

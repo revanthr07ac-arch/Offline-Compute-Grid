@@ -15,7 +15,7 @@ type ErrorType =
   | "network-error";
 
 interface ErrorPageProps {
-  type: ErrorType;
+  type?: ErrorType;
   onRetry?: () => void;
   onHome?: () => void;
 }
@@ -137,7 +137,11 @@ const config: Record<
   },
 };
 
-export default function ErrorPage({ type, onRetry, onHome }: ErrorPageProps) {
+export default function ErrorPage({
+  type = "404",
+  onRetry = () => window.location.reload(),
+  onHome = () => { window.location.href = "/"; },
+}: ErrorPageProps = {}) {
   const c = config[type];
 
   return (

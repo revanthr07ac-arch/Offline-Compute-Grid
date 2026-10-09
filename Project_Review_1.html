@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Offline Compute Grid - Extended Project Review Document</title>
+  <style>
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      line-height: 1.6;
+      color: #000;
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 22px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    h2 {
+      text-align: center;
+      font-size: 18px;
+      margin-top: 0;
+      margin-bottom: 40px;
+      text-decoration: underline;
+    }
+    h3 {
+      font-size: 18px;
+      text-transform: uppercase;
+      margin-top: 35px;
+      border-bottom: 2px solid #000;
+      padding-bottom: 5px;
+    }
+    h4 {
+      font-size: 16px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      text-decoration: underline;
+    }
+    p {
+      text-align: justify;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      text-indent: 30px;
+    }
+    ul {
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    li {
+      margin-bottom: 8px;
+      text-align: justify;
+    }
+    .cover {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    .cover h1 { font-size: 26px; border: none; }
+    
+    @media print {
+      body { padding: 0; max-width: 100%; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="no-print" style="background: #ECFDF5; color: #10B981; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; text-align: center; font-family: sans-serif;">
+    Tip: A print dialog should open automatically. Choose "Save as PDF" to generate your highly detailed project document.
+  </div>
+
+  <div class="cover">
+    <h1>OFFLINE COMPUTE GRID: <br>LOCATION-AWARE TASK OFFLOADING IN TWO-TIERED MOBILE CLOUD ENVIRONMENTS</h1>
+    <h2>V SEMESTER COMPREHENSIVE PROJECT REVIEW</h2>
+  </div>
+
+  <h3>1. Abstract</h3>
+  <p>
+    Mobile Cloud Computing (MCC) is rapidly emerging as a primary ubiquitous computing platform, enabling mobile devices to overcome inherent resource limitations—such as battery life, storage capacity, and processing power—by offloading data-intensive computational tasks to resource-rich environments. The "Offline Compute Grid" project proposes and implements a comprehensive management dashboard designed for a two-tiered mobile cloud computing architecture. This architecture bridges the gap between resource-poor mobile devices and high-latency public clouds by introducing an intermediate "local cloudlet" accessible via Wi-Fi. 
+  </p>
+  <p>
+    The core objective of this project is to implement an online, location-aware offloading system that fairly shares the use of the local cloudlet among multiple heterogeneous mobile devices. Instead of relying on rigid, offline scheduling, the system utilizes a Node.js-based orchestration backend to dynamically evaluate real-time parameters such as device residual energy, Wi-Fi access point bandwidth capacities, and strict Service Level Agreements (SLAs). The project culminates in a highly responsive React.js Single Page Application (SPA) dashboard that provides network administrators with real-time visualization of task offloading bipartite-matching algorithms, ensuring that mobile devices extend their operational lifetimes by consuming a fair, proportional amount of energy across the grid.
+  </p>
+
+  <h3>2. Introduction</h3>
+  <p>
+    With the relentless technological advancement of wireless portable devices, modern society has become heavily dependent on smartphones and tablets for increasingly complex applications. Applications such as augmented reality, high-definition video processing, and real-time machine learning inference require significant computational and storage resources that most mobile devices simply cannot meet due to strict physical constraints on CPU speed and battery capacity. Mobile Cloud Computing (MCC) addresses these demands by shifting the heavy lifting from the mobile device to the cloud. However, traditional MCC relies on remote public clouds (e.g., Amazon EC2, Microsoft Azure), which must be accessed via 3G/4G cellular networks. Cellular transmission suffers from high latency, slow data transfer rates, and massive energy consumption on the mobile device's radio interface, often negating the benefits of offloading.
+  </p>
+  <p>
+    To resolve this, the "Offline Compute Grid" implements a two-tiered architecture that introduces a "local cloudlet"—a cluster of localized computers accessible via high-speed, low-energy Wi-Fi connections. Because mobile users are dynamic and move unpredictably through different Wi-Fi access point (AP) zones, task offloading must be handled opportunistically and "online." Our project focuses on the software implementation of this orchestration. By utilizing an Express.js backend API and a modern React.js frontend, we provide a visual, interactive system that tracks mobile user locations, evaluates available AP channels, and intelligently schedules tasks. The ultimate goal is to maximize the minimum residual energy ratio across all connected mobile devices, providing "equal opportunities" for both powerful laptops and restricted smartphones to offload tasks fairly without violating their respective Service Level Agreements (SLAs).
+  </p>
+
+  <h3>3. Literature Survey</h3>
+  
+  <h4>3.1 Existing System</h4>
+  <p>
+    Considerable efforts have been made in recent years to address mobile application offloading. Systems like CloneCloud and MAUI aim to partition applications between mobile devices and a local cloudlet. However, these legacy systems primarily utilize offline, static partitioning mechanisms. They run simulations under fixed network characteristics to find an execution point and store it in a database. At runtime, they blindly pick a partition and offload it. This static approach fails entirely in real-world scenarios where mobile users travel between different venues (classrooms, libraries), causing dynamic fluctuations in Wi-Fi signal strength and Access Point bandwidth availability.
+  </p>
+  <p>
+    Furthermore, existing studies heavily focus on minimizing the absolute energy consumption or response time for a single, isolated device. They completely ignore the concept of "fair use" among a massive population of mobile users. In a real environment, careless task offloading results in a biased allocation where powerful devices (which have larger batteries and better connectivity) monopolize the local cloudlet's processing power, while restricted smartphones are unfairly forced to execute heavy tasks locally or use energy-draining 3G/4G networks, causing rapid battery death.
+  </p>
+
+  <h4>3.2 Proposed System</h4>
+  <p>
+    The "Offline Compute Grid" rectifies these flaws by proposing a dynamic, online location-aware task offloading system. In this proposed architecture, tasks arrive unpredictably in discrete time slots. The Node.js orchestration backend constructs a weighted bipartite matching graph in real-time. It maps incoming tasks (vertices on the left) to available computing facilities (local cloudlet via specific Wi-Fi APs, remote cloud via cellular, or the mobile device itself; vertices on the right). 
+  </p>
+  <p>
+    The weights assigned to these edges are calculated using an advanced energy cost model that evaluates the "residual energy ratio" of the specific mobile device. The algorithm actively penalizes assigning tasks to devices with critically low batteries, forcing the system to offload their workloads to the local cloudlet. To make this complex, algorithmic backend accessible and manageable, the proposed system features a React-based frontend dashboard. This dashboard visually renders the network topology, tracks active task processing speeds, displays device statuses (Online, Busy, Idle), and provides real-time metrics on CPU and RAM utilization across the local cloudlet.
+  </p>
+
+  <h4>3.3 Feasibility Study</h4>
+  <ul>
+    <li><strong>Technical Feasibility:</strong> The project is technically robust. Node.js is inherently asynchronous and event-driven, making it the perfect candidate for handling non-blocking bipartite matching algorithms and concurrent task requests from hundreds of mobile devices. The frontend utilizes React's Virtual DOM and Vite's rapid bundling, ensuring that the dashboard renders high-frequency telemetry updates (via Recharts) at a consistent 60 frames-per-second without crashing the browser.</li>
+    <li><strong>Economic Feasibility:</strong> The two-tiered architecture is exceptionally cost-effective. By maximizing offloading to the local Wi-Fi cloudlet, the system avoids the exorbitant costs associated with 3G/4G cellular data plans. Furthermore, local cloudlets can be constructed using commodity hardware (repurposed PCs), circumventing expensive hourly billing from major cloud providers like AWS or Azure.</li>
+    <li><strong>Operational Feasibility:</strong> The system abstracts the deep mathematical complexities of task-scheduling into a clean, modern user interface. Network administrators do not need to understand weighted bipartite graphs; they simply view device health, active tasks, and grid efficiency through intuitive Tailwind CSS-styled cards and visual indicators, making operational deployment highly feasible for university campuses or corporate offices.</li>
+  </ul>
+
+  <h4>3.4 Tools and Technologies</h4>
+  <ul>
+    <li><strong>Frontend UI Library: React.js (v19):</strong> Utilized for its modular component architecture, allowing the isolation of complex dashboard elements (e.g., Task Managers, Device Detail views) into reusable, maintainable code blocks.</li>
+    <li><strong>Build Engine: Vite (v8):</strong> Chosen over traditional bundlers like Webpack for its native ES-module support, providing near-instantaneous Hot Module Replacement (HMR) during development.</li>
+    <li><strong>Styling Framework: Tailwind CSS (v4):</strong> A utility-first CSS framework that allows for rapid, inline styling, entirely removing the need for complex, cascading stylesheets and preventing CSS bloat.</li>
+    <li><strong>Data Visualization: Recharts & Lucide React:</strong> Recharts is used to bind real-time algorithmic output (e.g., system throughput, CPU utilization) to SVG-based Area and Line charts. Lucide React provides crisp, scalable iconography.</li>
+    <li><strong>Backend Runtime: Node.js & Express.js:</strong> The V8 JavaScript engine powers the backend API, routing task offloading requests and simulating the real-time execution of the location-aware scheduling algorithms.</li>
+  </ul>
+
+  <h4>3.5 Software & Hardware Requirements</h4>
+  <ul>
+    <li><strong>Hardware Requirements:</strong>
+      <ul>
+        <li><strong>Local Cloudlet (Master Node):</strong> A dedicated high-performance server (e.g., Intel Xeon / AMD EPYC, Min 16GB RAM) running the Node.js coordination environment and executing the offloaded tasks.</li>
+        <li><strong>Mobile Devices (Worker/Client Nodes):</strong> Heterogeneous devices including Android smartphones, Apple iPads, and Windows Laptops equipped with 802.11g/n/ac Wi-Fi transceivers and 3G/4G cellular modems.</li>
+        <li><strong>Network Infrastructure:</strong> A dense deployment of Wi-Fi Access Points (APs) distributed across the geographical area (e.g., a university campus) connected to a Gigabit local switch.</li>
+      </ul>
+    </li>
+    <li><strong>Software Requirements:</strong>
+      <ul>
+        <li><strong>Operating System:</strong> Ubuntu Server 22.04 LTS (for the local cloudlet); Android/iOS for client devices.</li>
+        <li><strong>Runtime Environment:</strong> Node.js version 20.x or higher.</li>
+        <li><strong>Client Access:</strong> A modern HTML5, CSS3, and ES6 compliant web browser (Google Chrome, Mozilla Firefox, Microsoft Edge) to render the administrative dashboard.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <script>
+    // Automatically trigger the print dialog to allow saving as PDF
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

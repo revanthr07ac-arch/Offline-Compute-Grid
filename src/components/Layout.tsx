@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Grid2x2,
   LayoutDashboard,
@@ -36,6 +36,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/files": "Files",
   "/performance": "Performance",
   "/logs": "Logs",
+  "/notifications": "Notifications",
   "/settings": "Settings",
   "/profile": "Profile",
 };
@@ -46,6 +47,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const pageTitle = PAGE_TITLES[location.pathname] ?? "Dashboard";
 
   return (
@@ -226,6 +228,8 @@ export default function Layout({ children }: LayoutProps) {
           </div>
 
           <button
+            onClick={() => navigate("/notifications")}
+            aria-label="View notifications"
             style={{
               position: "relative",
               background: "none",
@@ -262,6 +266,10 @@ export default function Layout({ children }: LayoutProps) {
           </button>
 
           <div
+            onClick={() => navigate("/profile")}
+            role="button"
+            tabIndex={0}
+            aria-label="View profile"
             style={{
               width: 36,
               height: 36,
@@ -299,6 +307,8 @@ export default function Layout({ children }: LayoutProps) {
           </button>
 
           <button
+            onClick={() => navigate("/notifications")}
+            aria-label="View notifications"
             style={{
               position: "relative",
               background: "none",
@@ -335,6 +345,10 @@ export default function Layout({ children }: LayoutProps) {
           </button>
 
           <div
+            onClick={() => navigate("/profile")}
+            role="button"
+            tabIndex={0}
+            aria-label="View profile"
             style={{
               width: 32,
               height: 32,

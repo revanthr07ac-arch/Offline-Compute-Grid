@@ -73,7 +73,7 @@ function getSmallIcon(type: FileItem["type"]) {
 }
 
 interface Props {
-  onFileSelect?: (file: any) => void;
+  onFileSelect?: (file: FileItem) => void;
 }
 
 export default function FileManagerPage({ onFileSelect }: Props) {

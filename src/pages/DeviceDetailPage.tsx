@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   ChevronLeft,
   MoreVertical,
@@ -23,7 +23,7 @@ import {
 import type { DeviceType } from "./DevicesPage";
 
 interface DeviceDetailPageProps {
-  device: DeviceType;
+  deviceId: string;
   onBack: () => void;
 }
 
@@ -114,8 +114,22 @@ function InfoRow({ label, value, mono = false, last = false }: { label: string; 
   );
 }
 
-export default function DeviceDetailPage({ device, onBack }: DeviceDetailPageProps) {
-  const chartData = useMemo(() => generateChartData(), [device.id]);
+export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageProps) {
+  const [device, setDevice] = React.useState<DeviceType | null>(null);
+
+  React.useEffect(() => {
+    fetch(`/api/devices/${deviceId}`)
+      .then(res => res.json())
+      .then(data => setDevice(data))
+      .catch(err => console.error("Failed to fetch device", err));
+  }, [deviceId]);
+
+  const [activeTab, setActiveTab] = React.useState("overview");
+  const chartData = useMemo(() => Array.from({ length: 24 }, (_, i) => ({ time: `${i}:00`, value: Math.round(20 + Math.random() * 60) })), []);
+
+  if (!device) {
+    return <div style={{ padding: 24 }}>Loading device details...</div>;
+  }
 
   const batteryDisplay = device.battery !== null ? `${device.battery}%` : "AC";
   const batteryValue = device.battery !== null ? device.battery : 100;

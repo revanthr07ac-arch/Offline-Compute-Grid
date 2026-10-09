@@ -15,17 +15,32 @@ export default function LoginPage({ onLogin, onForgotPassword, onCreateAccount }
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (!email || !password) {
       setError("Please enter your email and password.");
       return;
     }
     setError("");
     setLoading(true);
-    setTimeout(() => {
+    
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
       setLoading(false);
-      onLogin();
-    }, 1200);
+      
+      if (res.ok) {
+        onLogin();
+      } else {
+        setError(data.message || "Failed to login");
+      }
+    } catch (err) {
+      setLoading(false);
+      setError("Network error");
+    }
   };
 
   return (

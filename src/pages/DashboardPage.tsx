@@ -1,3 +1,4 @@
+import React from "react";
 import { Users, Monitor, Cpu, MemoryStick, Activity, Zap, HardDrive, CheckCircle2 } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 
@@ -214,6 +215,26 @@ function TaskRow({
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 export default function DashboardPage() {
+  const [metrics, setMetrics] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    fetch('/api/dashboard')
+      .then(res => res.json())
+      .then(data => setMetrics(data))
+      .catch(err => console.error("Failed to fetch dashboard", err));
+  }, []);
+
+  const dMetrics = metrics ? [
+    { label: "Connected Devices", value: metrics.metrics.connectedDevices.toString(), sub: `${metrics.metrics.onlineDevices} online`, icon: Monitor, color: "#4F6FFF" },
+    { label: "CPU Cores", value: "48", sub: "3.2 GHz avg", icon: Cpu, color: "#7C5CFC" },
+    { label: "Available RAM", value: "124 GB", sub: "of 192 GB", icon: MemoryStick, color: "#10B981" },
+    { label: "Running Tasks", value: metrics.metrics.runningTasks.toString(), sub: `${metrics.metrics.queuedTasks} queued`, icon: Activity, color: "#F59E0B" },
+    { label: "Processing", value: "2.4 GH/s", sub: "peak 3.1", icon: Zap, color: "#4F6FFF" },
+    { label: "Storage", value: "247 GB", sub: "512 GB total", icon: HardDrive, color: "#0EA5E9" },
+  ] : metricCards;
+
+  const dCharts = metrics ? metrics.charts : { cpuData, memData, netData, diskData };
+
   return (
     <div style={{ minHeight: "100vh", background: "#F7F9FC", fontFamily: "'Inter', system-ui, sans-serif", padding: "0 16px", maxWidth: 480, margin: "0 auto" }}>
 
@@ -235,7 +256,7 @@ export default function DashboardPage() {
 
       {/* ── Section 2: Scrollable Metric Cards ── */}
       <div
-        className="animate-fade-in-up"
+        className="animate-fade-in-up metric-scroll"
         style={{
           display: "flex", overflowX: "auto", gap: 12,
           marginLeft: -16, marginRight: -16,

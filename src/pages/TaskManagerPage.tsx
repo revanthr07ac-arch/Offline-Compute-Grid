@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Search,
   Plus,
@@ -25,154 +25,6 @@ interface Task {
   status: "running" | "pending" | "completed" | "failed" | "cancelled";
   error?: string;
 }
-
-const ALL_TASKS: Task[] = [
-  {
-    id: "t1",
-    name: "4K Video Transcoding — Episode 12",
-    type: "Video",
-    priority: "high",
-    progress: 67,
-    eta: "41 min",
-    workers: 5,
-    size: "8.4 GB",
-    by: "admin",
-    status: "running",
-  },
-  {
-    id: "t2",
-    name: "ML Model Training — ResNet50",
-    type: "Python",
-    priority: "critical",
-    progress: 34,
-    eta: "2h 15m",
-    workers: 3,
-    size: "2.1 GB",
-    by: "ml-engineer",
-    status: "running",
-  },
-  {
-    id: "t3",
-    name: "Document OCR Batch — Q4",
-    type: "Document",
-    priority: "medium",
-    progress: 89,
-    eta: "8 min",
-    workers: 2,
-    size: "450 MB",
-    by: "analyst",
-    status: "running",
-  },
-  {
-    id: "t4",
-    name: "Image Compression — Product Photos",
-    type: "Image",
-    priority: "low",
-    progress: 0,
-    eta: "25 min",
-    workers: 0,
-    size: "1.2 GB",
-    by: "designer",
-    status: "pending",
-  },
-  {
-    id: "t5",
-    name: "Audio Normalization — Podcast S3",
-    type: "Audio",
-    priority: "medium",
-    progress: 0,
-    eta: "12 min",
-    workers: 0,
-    size: "340 MB",
-    by: "editor",
-    status: "pending",
-  },
-  {
-    id: "t6",
-    name: "Database Backup Compression",
-    type: "Compression",
-    priority: "high",
-    progress: 0,
-    eta: "45 min",
-    workers: 0,
-    size: "5.6 GB",
-    by: "admin",
-    status: "pending",
-  },
-  {
-    id: "t7",
-    name: "Logo Asset Export — Brand Kit",
-    type: "Image",
-    priority: "low",
-    progress: 100,
-    eta: "Done",
-    workers: 2,
-    size: "80 MB",
-    by: "designer",
-    status: "completed",
-  },
-  {
-    id: "t8",
-    name: "Report Generation — Monthly",
-    type: "Document",
-    priority: "medium",
-    progress: 100,
-    eta: "Done",
-    workers: 1,
-    size: "120 MB",
-    by: "analyst",
-    status: "completed",
-  },
-  {
-    id: "t9",
-    name: "Thumbnail Batch — Season 2",
-    type: "Image",
-    priority: "low",
-    progress: 100,
-    eta: "Done",
-    workers: 3,
-    size: "200 MB",
-    by: "editor",
-    status: "completed",
-  },
-  {
-    id: "t10",
-    name: "Config Backup — Cluster A",
-    type: "Compression",
-    priority: "medium",
-    progress: 100,
-    eta: "Done",
-    workers: 1,
-    size: "15 MB",
-    by: "admin",
-    status: "completed",
-  },
-  {
-    id: "t11",
-    name: "Training Data Archive",
-    type: "Python",
-    priority: "high",
-    progress: 100,
-    eta: "Done",
-    workers: 4,
-    size: "3.2 GB",
-    by: "ml-engineer",
-    status: "completed",
-  },
-  {
-    id: "t12",
-    name: "Python Data Pipeline v2",
-    type: "Python",
-    priority: "critical",
-    progress: 23,
-    eta: "N/A",
-    workers: 2,
-    size: "890 MB",
-    by: "ml-engineer",
-    status: "failed",
-    error: "OOM on RPi-3",
-  },
-];
 
 const TABS = [
   { key: "running" as const, label: "Running", count: 3 },
@@ -552,8 +404,16 @@ export default function TaskManagerPage({
 }: TaskManagerPageProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("running");
   const [searchQuery, setSearchQuery] = useState("");
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-  const filtered = ALL_TASKS.filter(
+  React.useEffect(() => {
+    fetch('/api/tasks')
+      .then(res => res.json())
+      .then(data => setTasks(data))
+      .catch(err => console.error("Failed to fetch tasks", err));
+  }, []);
+
+  const filtered = tasks.filter(
     (t) =>
       t.status === activeTab &&
       (searchQuery === "" ||

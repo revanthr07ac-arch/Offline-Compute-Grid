@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Search,
   Radar,
@@ -29,16 +29,7 @@ export interface DeviceType {
   task: string | null;
 }
 
-export const DEVICES: DeviceType[] = [
-  { id: "1", name: "DESKTOP-A7X", type: "Laptop", role: "Master", ip: "192.168.1.101", hostname: "desktop-a7x", cpu: 78, ram: 65, storage: 42, battery: 91, net: "1.2 Gbps", os: "Ubuntu 22.04", ping: 0, status: "online", task: "Coordinating" },
-  { id: "2", name: "PC-Tower-2", type: "PC", role: "Worker", ip: "192.168.1.102", hostname: "workstation-b2", cpu: 45, ram: 52, storage: 78, battery: null, net: "1.0 Gbps", os: "Windows 11", ping: 1, status: "busy", task: "Video Encode" },
-  { id: "3", name: "RPi-4B-3", type: "Pi", role: "Worker", ip: "192.168.1.103", hostname: "raspberrypi-3", cpu: 89, ram: 71, storage: 23, battery: null, net: "100 Mbps", os: "Raspberry Pi OS", ping: 2, status: "busy", task: "OCR Batch" },
-  { id: "4", name: "Samsung-A54", type: "Android", role: "Worker", ip: "192.168.1.104", hostname: "android-samsung", cpu: 34, ram: 48, storage: 56, battery: 67, net: "300 Mbps", os: "Android 14", ping: 8, status: "idle", task: null },
-  { id: "5", name: "MacBook-Pro-5", type: "Mac", role: "Worker", ip: "192.168.1.105", hostname: "MBP-M3-5", cpu: 23, ram: 38, storage: 31, battery: 84, net: "1.2 Gbps", os: "macOS 14", ping: 1, status: "online", task: null },
-  { id: "6", name: "RPi-Zero-6", type: "Pi", role: "Worker", ip: "192.168.1.106", hostname: "raspberrypi-6", cpu: 12, ram: 29, storage: 18, battery: null, net: "100 Mbps", os: "Raspberry Pi OS", ping: 3, status: "idle", task: null },
-  { id: "7", name: "Gaming-PC-7", type: "PC", role: "Worker", ip: "192.168.1.107", hostname: "GAMING-RIG-7", cpu: 0, ram: 0, storage: 88, battery: null, net: "—", os: "Windows 11", ping: null, status: "offline", task: null },
-  { id: "8", name: "Lenovo-Tab", type: "Android", role: "Worker", ip: "192.168.1.108", hostname: "lenovo-tab", cpu: 56, ram: 44, storage: 62, battery: 33, net: "150 Mbps", os: "Android 13", ping: 12, status: "online", task: null },
-];
+
 
 type FilterType = "all" | "online" | "busy" | "idle" | "offline";
 
@@ -185,17 +176,25 @@ interface DevicesPageProps {
 export default function DevicesPage({ onDeviceSelect }: DevicesPageProps) {
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [devices, setDevices] = useState<DeviceType[]>([]);
+
+  useEffect(() => {
+    fetch('/api/devices')
+      .then(res => res.json())
+      .then(data => setDevices(data))
+      .catch(err => console.error("Failed to fetch devices", err));
+  }, []);
 
   const filtered = useMemo(() => {
-    return DEVICES.filter(d => {
+    return devices.filter(d => {
       const matchFilter = activeFilter === "all" || d.status === activeFilter;
       const q = searchQuery.toLowerCase();
       const matchSearch = !q || d.name.toLowerCase().includes(q) || d.ip.includes(q) || d.hostname.toLowerCase().includes(q);
       return matchFilter && matchSearch;
     });
-  }, [activeFilter, searchQuery]);
+  }, [activeFilter, searchQuery, devices]);
 
-  const onlineCount = DEVICES.filter(d => d.status === "online" || d.status === "busy").length;
+  const onlineCount = devices.filter(d => d.status === "online" || d.status === "busy").length;
 
   return (
     <div style={{ background: "#F7F9FC", minHeight: "100vh", paddingBottom: 96 }}>

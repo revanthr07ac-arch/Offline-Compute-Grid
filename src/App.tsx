@@ -8,7 +8,7 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import CreateAccountPage from './pages/auth/CreateAccountPage'
 import VerifyEmailPage from './pages/auth/VerifyEmailPage'
 import DashboardPage from './pages/DashboardPage'
-import DevicesPage, { DEVICES } from './pages/DevicesPage'
+import DevicesPage from './pages/DevicesPage'
 import DeviceDetailPage from './pages/DeviceDetailPage'
 import TaskManagerPage from './pages/TaskManagerPage'
 import TaskDetailPage from './pages/TaskDetailPage'
@@ -19,6 +19,7 @@ import LogsPage from './pages/LogsPage'
 import NotificationsPage from './pages/NotificationsPage'
 import SettingsPage from './pages/SettingsPage'
 import ProfilePage from './pages/ProfilePage'
+import ErrorPage from './pages/ErrorPage'
 
 type AuthScreen = 'splash' | 'login' | 'forgot' | 'create' | 'verify'
 
@@ -68,10 +69,6 @@ export default function App() {
     }
   }
 
-  const selectedDevice = selectedDeviceId
-    ? (DEVICES.find(d => d.id === selectedDeviceId) ?? null)
-    : null
-
   return (
     <ToastProvider>
       <BrowserRouter>
@@ -81,8 +78,8 @@ export default function App() {
             <Route
               path="/devices"
               element={
-                selectedDevice
-                  ? <DeviceDetailPage device={selectedDevice} onBack={() => setSelectedDeviceId(null)} />
+                selectedDeviceId
+                  ? <DeviceDetailPage deviceId={selectedDeviceId} onBack={() => setSelectedDeviceId(null)} />
                   : <DevicesPage onDeviceSelect={setSelectedDeviceId} />
               }
             />
@@ -121,7 +118,7 @@ export default function App() {
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<ErrorPage />} />
           </Routes>
         </Layout>
       </BrowserRouter>
