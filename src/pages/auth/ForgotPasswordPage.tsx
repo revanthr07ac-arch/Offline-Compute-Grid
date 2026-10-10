@@ -78,14 +78,14 @@ export default function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) 
             style={{
               width: "72px",
               height: "72px",
-              background: "#EEF3FF",
+              background: "#F3E8FF",
               borderRadius: "20px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Lock size={32} color="#4F6FFF" />
+            <Lock size={32} color="#8B5CF6" />
           </div>
         </div>
 
@@ -196,7 +196,7 @@ export default function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) 
               border: "none",
               cursor: "pointer",
               fontSize: "14px",
-              color: "#4F6FFF",
+              color: "#8B5CF6",
               fontWeight: "500",
               padding: 0,
             }}

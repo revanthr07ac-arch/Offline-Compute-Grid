@@ -17,7 +17,7 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
         width: 44,
         height: 24,
         borderRadius: 12,
-        backgroundColor: on ? "#4F6FFF" : "#E6EAF0",
+        backgroundColor: on ? "#8B5CF6" : "#E6EAF0",
         position: "relative",
         cursor: "pointer",
         transition: "background-color 0.2s",
@@ -102,11 +102,11 @@ const activityItems = [
 ];
 
 const dotColors = [
-  "#4F6FFF",
+  "#8B5CF6",
   "#10B981",
   "#7C5CFC",
   "#F59E0B",
-  "#4F6FFF",
+  "#8B5CF6",
   "#EF4444",
 ];
 
@@ -167,7 +167,7 @@ export default function ProfilePage() {
         <button
           style={{
             fontSize: 14,
-            color: "#4F6FFF",
+            color: "#8B5CF6",
             background: "none",
             border: "none",
             cursor: "pointer",
@@ -196,7 +196,7 @@ export default function ProfilePage() {
             width: 64,
             height: 64,
             borderRadius: "50%",
-            background: "linear-gradient(135deg, #4F6FFF, #7C5CFC)",
+            background: "linear-gradient(135deg, #8B5CF6, #7C5CFC)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -214,8 +214,8 @@ export default function ProfilePage() {
           <div style={{ marginTop: 3 }}>
             <span
               style={{
-                backgroundColor: "#EEF3FF",
-                color: "#4F6FFF",
+                backgroundColor: "#F3E8FF",
+                color: "#8B5CF6",
                 fontSize: 11,
                 borderRadius: 99,
                 paddingLeft: 8,
@@ -305,8 +305,8 @@ export default function ProfilePage() {
             </div>
             <button
               style={{
-                backgroundColor: "#EEF3FF",
-                color: "#4F6FFF",
+                backgroundColor: "#F3E8FF",
+                color: "#8B5CF6",
                 border: "none",
                 borderRadius: 8,
                 fontSize: 13,
@@ -355,7 +355,7 @@ export default function ProfilePage() {
                 <button
                   style={{
                     fontSize: 11,
-                    color: "#4F6FFF",
+                    color: "#8B5CF6",
                     background: "none",
                     border: "1px solid #E6EAF0",
                     borderRadius: 6,

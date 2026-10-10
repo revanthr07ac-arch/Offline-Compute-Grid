@@ -130,14 +130,14 @@ export default function VerifyEmailPage({ email, onVerified, onBack }: VerifyEma
           style={{
             width: "72px",
             height: "72px",
-            background: "#EEF3FF",
+            background: "#F3E8FF",
             borderRadius: "20px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Mail size={32} color="#4F6FFF" />
+          <Mail size={32} color="#8B5CF6" />
         </div>
 
         <h2
@@ -183,7 +183,7 @@ export default function VerifyEmailPage({ email, onVerified, onBack }: VerifyEma
                 width: "46px",
                 height: "56px",
                 background: "#FFFFFF",
-                border: `1.5px solid ${digit ? "#4F6FFF" : "#E6EAF0"}`,
+                border: `1.5px solid ${digit ? "#8B5CF6" : "#E6EAF0"}`,
                 borderRadius: "12px",
                 fontSize: "20px",
                 fontWeight: "700",
@@ -194,11 +194,11 @@ export default function VerifyEmailPage({ email, onVerified, onBack }: VerifyEma
                 fontFamily: "'Inter', system-ui, sans-serif",
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = "#4F6FFF";
+                e.target.style.borderColor = "#8B5CF6";
                 e.target.style.boxShadow = "0 0 0 3px rgba(79,111,255,0.1)";
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = digit ? "#4F6FFF" : "#E6EAF0";
+                e.target.style.borderColor = digit ? "#8B5CF6" : "#E6EAF0";
                 e.target.style.boxShadow = "none";
               }}
             />
@@ -251,7 +251,7 @@ export default function VerifyEmailPage({ email, onVerified, onBack }: VerifyEma
                 border: "none",
                 cursor: "pointer",
                 fontSize: "14px",
-                color: "#4F6FFF",
+                color: "#8B5CF6",
                 fontWeight: "500",
                 padding: 0,
               }}

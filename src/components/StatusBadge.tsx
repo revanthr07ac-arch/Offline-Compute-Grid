@@ -39,9 +39,9 @@ const STATUS_CONFIG: Record<StatusType, StatusConfig> = {
   },
   busy: {
     label: "Busy",
-    dotColor: "#4F6FFF",
-    bg: "#EEF3FF",
-    textColor: "#4F6FFF",
+    dotColor: "#8B5CF6",
+    bg: "#F3E8FF",
+    textColor: "#8B5CF6",
     pulse: false,
   },
   idle: {

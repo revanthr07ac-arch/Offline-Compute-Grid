@@ -85,12 +85,12 @@ const PRIORITY_STYLES: Record<
 > = {
   critical: { bg: "#FEF2F2", color: "#EF4444", label: "Critical" },
   high: { bg: "#FFF7ED", color: "#F59E0B", label: "High" },
-  medium: { bg: "#EEF3FF", color: "#4F6FFF", label: "Medium" },
+  medium: { bg: "#F3E8FF", color: "#8B5CF6", label: "Medium" },
   low: { bg: "#F1F4F9", color: "#667085", label: "Low" },
 };
 
 const WORKER_DATA = [
-  { name: "RPi-4 Node A", ip: "192.168.1.101", color: "#4F6FFF", contrib: 35 },
+  { name: "RPi-4 Node A", ip: "192.168.1.101", color: "#8B5CF6", contrib: 35 },
   { name: "RPi-4 Node B", ip: "192.168.1.102", color: "#7C5CFC", contrib: 28 },
   { name: "x86 Worker-1", ip: "192.168.1.110", color: "#10B981", contrib: 22 },
   { name: "x86 Worker-2", ip: "192.168.1.111", color: "#F59E0B", contrib: 15 },
@@ -98,8 +98,8 @@ const WORKER_DATA = [
 ];
 
 const LOG_LINES = [
-  { level: "INFO", color: "#4F6FFF", bg: "#EEF3FF", text: "Chunk 25 dispatched to RPi-4 Node A" },
-  { level: "INFO", color: "#4F6FFF", bg: "#EEF3FF", text: "Chunk 24 completed — 99.8 MB written" },
+  { level: "INFO", color: "#8B5CF6", bg: "#F3E8FF", text: "Chunk 25 dispatched to RPi-4 Node A" },
+  { level: "INFO", color: "#8B5CF6", bg: "#F3E8FF", text: "Chunk 24 completed — 99.8 MB written" },
   { level: "WARNING", color: "#F59E0B", bg: "#FFF7ED", text: "RPi-3 Backup high temp: 72°C" },
   { level: "SUCCESS", color: "#10B981", bg: "#ECFDF5", text: "Chunk 23 verified, checksum OK" },
 ];
@@ -123,10 +123,15 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailPageProps) 
   const [task, setTask] = React.useState<TaskData | null>(null);
 
   React.useEffect(() => {
-    fetch(`/api/tasks/${taskId}`)
-      .then(res => res.json())
-      .then(data => setTask(data))
-      .catch(err => console.error("Failed to fetch task", err));
+    const fetchTask = () => {
+      fetch(`/api/tasks/${taskId}`)
+        .then(res => res.json())
+        .then(data => setTask(data))
+        .catch(err => console.error("Failed to fetch task", err));
+    };
+    fetchTask();
+    const interval = setInterval(fetchTask, 3000);
+    return () => clearInterval(interval);
   }, [taskId]);
 
   if (!task) return <div style={{ padding: 24 }}>Loading task details...</div>;
@@ -259,7 +264,7 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailPageProps) 
             style={{
               width: `${task.progress}%`,
               height: "100%",
-              background: "#4F6FFF",
+              background: "#8B5CF6",
               borderRadius: 4,
             }}
           />
@@ -333,8 +338,8 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailPageProps) 
           </span>
           <span
             style={{
-              background: "#EEF3FF",
-              color: "#4F6FFF",
+              background: "#F3E8FF",
+              color: "#8B5CF6",
               fontSize: 12,
               fontWeight: 600,
               borderRadius: 99,
@@ -470,7 +475,7 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailPageProps) 
           <span
             style={{
               fontSize: 13,
-              color: "#4F6FFF",
+              color: "#8B5CF6",
               fontWeight: 500,
               cursor: "pointer",
             }}

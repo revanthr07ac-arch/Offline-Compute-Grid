@@ -96,6 +96,26 @@ app.post('/api/auth/login', (req, res) => {
   }
 });
 
+// Simulate task progression
+setInterval(() => {
+  currentTasks.forEach(task => {
+    if (task.status === 'pending') {
+      task.status = 'running';
+      task.workers = Math.floor(Math.random() * 4) + 1;
+    }
+    if (task.status === 'running') {
+      task.progress += Math.floor(Math.random() * 5) + 1;
+      if (task.progress >= 100) {
+        task.progress = 100;
+        task.status = 'completed';
+        task.eta = '—';
+      } else {
+        task.eta = `${Math.floor((100 - task.progress) / 5)} min`;
+      }
+    }
+  });
+}, 3000);
+
 app.listen(port, () => {
   console.log(`Backend server running on http://localhost:${port}`);
 });

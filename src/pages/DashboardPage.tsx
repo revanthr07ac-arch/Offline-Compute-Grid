@@ -10,11 +10,11 @@ const diskData = Array.from({ length: 20 }, (_, i) => ({ v: Math.round(40 + Math
 
 // ─── Metric Cards ─────────────────────────────────────────────────────────────
 const metricCards = [
-  { label: "Connected Devices", value: "8", sub: "+2 today", icon: Monitor, color: "#4F6FFF" },
+  { label: "Connected Devices", value: "8", sub: "+2 today", icon: Monitor, color: "#8B5CF6" },
   { label: "CPU Cores", value: "48", sub: "3.2 GHz avg", icon: Cpu, color: "#7C5CFC" },
   { label: "Available RAM", value: "124 GB", sub: "of 192 GB", icon: MemoryStick, color: "#10B981" },
   { label: "Running Tasks", value: "3", sub: "2 queued", icon: Activity, color: "#F59E0B" },
-  { label: "Processing", value: "2.4 GH/s", sub: "peak 3.1", icon: Zap, color: "#4F6FFF" },
+  { label: "Processing", value: "2.4 GH/s", sub: "peak 3.1", icon: Zap, color: "#8B5CF6" },
   { label: "Storage", value: "247 GB", sub: "512 GB total", icon: HardDrive, color: "#0EA5E9" },
 ];
 
@@ -79,11 +79,11 @@ function NetworkTopology() {
       <svg width="100%" viewBox="0 0 360 220" style={{ display: "block" }}>
         <defs>
           <linearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#4F6FFF" />
+            <stop offset="0%" stopColor="#8B5CF6" />
             <stop offset="100%" stopColor="#7C5CFC" />
           </linearGradient>
           <filter id="master-shadow" x="-40%" y="-40%" width="180%" height="180%">
-            <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#4F6FFF" floodOpacity="0.3" />
+            <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#8B5CF6" floodOpacity="0.3" />
           </filter>
         </defs>
 
@@ -106,7 +106,7 @@ function NetworkTopology() {
               key={`active-${idx}`}
               x1={master.x} y1={master.y}
               x2={w.x} y2={w.y}
-              stroke="#4F6FFF" strokeWidth={2}
+              stroke="#8B5CF6" strokeWidth={2}
               strokeOpacity={0.18}
               strokeDasharray="4 4"
               style={{ animation: "dash-move 1.2s linear infinite" }}
@@ -119,7 +119,7 @@ function NetworkTopology() {
           const w = workers[idx];
           const dur = 1.4 + idx * 0.3;
           return (
-            <circle key={`particle-${idx}`} r={3} fill="#4F6FFF">
+            <circle key={`particle-${idx}`} r={3} fill="#8B5CF6">
               <animateMotion
                 dur={`${dur}s`}
                 repeatCount="indefinite"
@@ -141,8 +141,8 @@ function NetworkTopology() {
 
         {/* Master node */}
         <circle cx={master.x} cy={master.y} r={30} fill="none" stroke="url(#grad)" strokeWidth={1.5} />
-        <circle cx={master.x} cy={master.y} r={24} fill="#FFFFFF" stroke="#4F6FFF" strokeWidth={2} filter="url(#master-shadow)" />
-        <text x={master.x} y={master.y + 5} textAnchor="middle" fill="#4F6FFF" fontSize={12} fontWeight="bold">M</text>
+        <circle cx={master.x} cy={master.y} r={24} fill="#FFFFFF" stroke="#8B5CF6" strokeWidth={2} filter="url(#master-shadow)" />
+        <text x={master.x} y={master.y + 5} textAnchor="middle" fill="#8B5CF6" fontSize={12} fontWeight="bold">M</text>
       </svg>
 
       <style>{`
@@ -155,7 +155,7 @@ function NetworkTopology() {
 }
 
 // ─── Worker Avatars ───────────────────────────────────────────────────────────
-const avatarColors = ["#4F6FFF", "#7C5CFC", "#10B981", "#F59E0B", "#0EA5E9"];
+const avatarColors = ["#8B5CF6", "#7C5CFC", "#10B981", "#F59E0B", "#0EA5E9"];
 const avatarInitials = ["DX", "MC", "LP", "AR", "TB"];
 
 // ─── Task Row ─────────────────────────────────────────────────────────────────
@@ -177,11 +177,11 @@ function TaskRow({
       {/* Icon */}
       <div style={{
         width: 28, height: 28, borderRadius: 8,
-        background: isRunning ? "#EEF3FF" : "#ECFDF5",
+        background: isRunning ? "#F3E8FF" : "#ECFDF5",
         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
       }}>
         {isRunning
-          ? <Activity size={14} color="#4F6FFF" />
+          ? <Activity size={14} color="#8B5CF6" />
           : <CheckCircle2 size={14} color="#10B981" />}
       </div>
 
@@ -190,8 +190,8 @@ function TaskRow({
         <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name}</div>
         <span style={{
           fontSize: 10, fontWeight: 600,
-          color: isRunning ? "#4F6FFF" : "#10B981",
-          background: isRunning ? "#EEF3FF" : "#ECFDF5",
+          color: isRunning ? "#8B5CF6" : "#10B981",
+          background: isRunning ? "#F3E8FF" : "#ECFDF5",
           borderRadius: 20, padding: "1px 6px", display: "inline-block", marginTop: 2,
         }}>{status}</span>
       </div>
@@ -201,7 +201,7 @@ function TaskRow({
         {isRunning && pct !== undefined ? (
           <>
             <div style={{ width: 72, height: 6, borderRadius: 3, background: "#F1F4F9", overflow: "hidden", marginBottom: 3 }}>
-              <div className="progress-bar-fill" style={{ width: `${pct}%`, height: "100%", background: "#4F6FFF", borderRadius: 3 }} />
+              <div className="progress-bar-fill" style={{ width: `${pct}%`, height: "100%", background: "#8B5CF6", borderRadius: 3 }} />
             </div>
             <div style={{ fontSize: 11, color: "#667085" }}>{pct}%</div>
           </>
@@ -218,18 +218,23 @@ export default function DashboardPage() {
   const [metrics, setMetrics] = React.useState<any>(null);
 
   React.useEffect(() => {
-    fetch('/api/dashboard')
-      .then(res => res.json())
-      .then(data => setMetrics(data))
-      .catch(err => console.error("Failed to fetch dashboard", err));
+    const fetchDashboard = () => {
+      fetch('/api/dashboard')
+        .then(res => res.json())
+        .then(data => setMetrics(data))
+        .catch(err => console.error("Failed to fetch dashboard", err));
+    };
+    fetchDashboard();
+    const interval = setInterval(fetchDashboard, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const dMetrics = metrics ? [
-    { label: "Connected Devices", value: metrics.metrics.connectedDevices.toString(), sub: `${metrics.metrics.onlineDevices} online`, icon: Monitor, color: "#4F6FFF" },
+    { label: "Connected Devices", value: metrics.metrics.connectedDevices.toString(), sub: `${metrics.metrics.onlineDevices} online`, icon: Monitor, color: "#8B5CF6" },
     { label: "CPU Cores", value: "48", sub: "3.2 GHz avg", icon: Cpu, color: "#7C5CFC" },
     { label: "Available RAM", value: "124 GB", sub: "of 192 GB", icon: MemoryStick, color: "#10B981" },
     { label: "Running Tasks", value: metrics.metrics.runningTasks.toString(), sub: `${metrics.metrics.queuedTasks} queued`, icon: Activity, color: "#F59E0B" },
-    { label: "Processing", value: "2.4 GH/s", sub: "peak 3.1", icon: Zap, color: "#4F6FFF" },
+    { label: "Processing", value: "2.4 GH/s", sub: "peak 3.1", icon: Zap, color: "#8B5CF6" },
     { label: "Storage", value: "247 GB", sub: "512 GB total", icon: HardDrive, color: "#0EA5E9" },
   ] : metricCards;
 
@@ -317,7 +322,7 @@ export default function DashboardPage() {
             <div key={label} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
               <div style={{ fontSize: 10, color: "#98A2B3", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
               <div style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{val}</div>
-              {pct !== null && <MiniBar pct={pct} color="#4F6FFF" />}
+              {pct !== null && <MiniBar pct={pct} color="#8B5CF6" />}
             </div>
           ))}
         </div>
@@ -345,14 +350,14 @@ export default function DashboardPage() {
       <div className="card animate-fade-in-up" style={{ padding: 16, marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
           <div style={{ fontSize: 12, color: "#98A2B3", textTransform: "uppercase", letterSpacing: "0.07em", fontWeight: 600 }}>Current Job</div>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#4F6FFF", background: "#EEF3FF", borderRadius: 20, padding: "2px 8px" }}>Running</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: "#8B5CF6", background: "#F3E8FF", borderRadius: 20, padding: "2px 8px" }}>Running</span>
         </div>
 
         <div style={{ fontSize: 15, fontWeight: 600, color: "#111827", marginBottom: 12 }}>4K Video Transcoding — Episode 12</div>
 
         {/* Progress bar */}
         <div style={{ width: "100%", height: 8, borderRadius: 4, background: "#F1F4F9", overflow: "hidden", marginBottom: 6 }}>
-          <div className="progress-bar-fill" style={{ width: "67%", height: "100%", background: "#4F6FFF", borderRadius: 4 }} />
+          <div className="progress-bar-fill" style={{ width: "67%", height: "100%", background: "#8B5CF6", borderRadius: 4 }} />
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
           <span style={{ fontSize: 13, color: "#667085" }}>67% · ETA 41 min</span>
@@ -393,7 +398,7 @@ export default function DashboardPage() {
 
       {/* ── Section 6: Performance Mini-Charts 2×2 ── */}
       <div className="animate-fade-in-up" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-        <ChartCard label="CPU" value="67%" data={cpuData} color="#4F6FFF" />
+        <ChartCard label="CPU" value="67%" data={cpuData} color="#8B5CF6" />
         <ChartCard label="Memory" value="71%" data={memData} color="#7C5CFC" />
         <ChartCard label="Network" value="142 MB/s" data={netData} color="#10B981" />
         <ChartCard label="Disk I/O" value="54 MB/s" data={diskData} color="#F59E0B" />
@@ -403,7 +408,7 @@ export default function DashboardPage() {
       <div className="card animate-fade-in-up" style={{ padding: 16, marginBottom: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
           <div style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>Recent Tasks</div>
-          <span style={{ fontSize: 13, color: "#4F6FFF", cursor: "pointer", fontWeight: 500 }}>View All</span>
+          <span style={{ fontSize: 13, color: "#8B5CF6", cursor: "pointer", fontWeight: 500 }}>View All</span>
         </div>
         <TaskRow name="4K Video Transcoding" status="Running" pct={67} />
         <TaskRow name="ML Model Training" status="Completed" />

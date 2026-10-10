@@ -42,12 +42,12 @@ const PRIORITY_STYLES: Record<
 > = {
   critical: { bg: "#FEF2F2", color: "#EF4444", label: "Critical" },
   high: { bg: "#FFF7ED", color: "#F59E0B", label: "High" },
-  medium: { bg: "#EEF3FF", color: "#4F6FFF", label: "Medium" },
+  medium: { bg: "#F3E8FF", color: "#8B5CF6", label: "Medium" },
   low: { bg: "#F1F4F9", color: "#667085", label: "Low" },
 };
 
 const WORKER_COLORS = [
-  "#4F6FFF",
+  "#8B5CF6",
   "#7C5CFC",
   "#10B981",
   "#F59E0B",
@@ -173,7 +173,7 @@ function TaskCard({
               style={{
                 width: `${task.progress}%`,
                 height: "100%",
-                background: task.status === "failed" ? "#EF4444" : "#4F6FFF",
+                background: task.status === "failed" ? "#EF4444" : "#8B5CF6",
                 borderRadius: 4,
               }}
             />
@@ -300,8 +300,8 @@ function TaskCard({
                 height: 32,
                 fontSize: 12,
                 padding: "0 12px",
-                background: "#EEF3FF",
-                color: "#4F6FFF",
+                background: "#F3E8FF",
+                color: "#8B5CF6",
                 border: "none",
                 borderRadius: 8,
                 fontWeight: 500,
@@ -356,8 +356,8 @@ function TaskCard({
                 height: 32,
                 fontSize: 12,
                 padding: "0 12px",
-                background: "#EEF3FF",
-                color: "#4F6FFF",
+                background: "#F3E8FF",
+                color: "#8B5CF6",
                 border: "none",
                 borderRadius: 8,
                 fontWeight: 500,
@@ -407,10 +407,16 @@ export default function TaskManagerPage({
   const [tasks, setTasks] = useState<Task[]>([]);
 
   React.useEffect(() => {
-    fetch('/api/tasks')
-      .then(res => res.json())
-      .then(data => setTasks(data))
-      .catch(err => console.error("Failed to fetch tasks", err));
+    const fetchTasks = () => {
+      fetch('/api/tasks')
+        .then(res => res.json())
+        .then(data => setTasks(data))
+        .catch(err => console.error("Failed to fetch tasks", err));
+    };
+    
+    fetchTasks(); // Initial fetch
+    const interval = setInterval(fetchTasks, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const filtered = tasks.filter(
@@ -507,11 +513,11 @@ export default function TaskManagerPage({
               fontSize: 14,
               fontWeight: 500,
               border: "none",
-              borderBottom: activeTab === tab.key ? "2px solid #4F6FFF" : "2px solid transparent",
+              borderBottom: activeTab === tab.key ? "2px solid #8B5CF6" : "2px solid transparent",
               background: "none",
               cursor: "pointer",
               whiteSpace: "nowrap",
-              color: activeTab === tab.key ? "#4F6FFF" : "#667085",
+              color: activeTab === tab.key ? "#8B5CF6" : "#667085",
               transition: "color 0.15s, border-color 0.15s",
             }}
           >
@@ -520,8 +526,8 @@ export default function TaskManagerPage({
               <span
                 style={{
                   marginLeft: 5,
-                  background: activeTab === tab.key ? "#EEF3FF" : "#F1F4F9",
-                  color: activeTab === tab.key ? "#4F6FFF" : "#98A2B3",
+                  background: activeTab === tab.key ? "#F3E8FF" : "#F1F4F9",
+                  color: activeTab === tab.key ? "#8B5CF6" : "#98A2B3",
                   borderRadius: 99,
                   fontSize: 11,
                   padding: "1px 6px",
@@ -574,7 +580,7 @@ export default function TaskManagerPage({
           width: 52,
           height: 52,
           borderRadius: "50%",
-          background: "#4F6FFF",
+          background: "#8B5CF6",
           border: "none",
           cursor: "pointer",
           display: "flex",

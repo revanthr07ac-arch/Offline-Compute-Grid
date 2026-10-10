@@ -156,8 +156,8 @@ export default function LogsPage() {
                 padding: "4px 10px",
                 borderRadius: 20,
                 border: "none",
-                background: autoScroll ? "#EEF3FF" : "#F1F4F9",
-                color: autoScroll ? "#4F6FFF" : "#667085",
+                background: autoScroll ? "#F3E8FF" : "#F1F4F9",
+                color: autoScroll ? "#8B5CF6" : "#667085",
                 fontSize: 12,
                 fontWeight: 500,
                 cursor: "pointer",
@@ -325,7 +325,7 @@ export default function LogsPage() {
             <span
               style={{
                 fontSize: 11,
-                color: "#4F6FFF",
+                color: "#8B5CF6",
                 width: 76,
                 flexShrink: 0,
                 overflow: "hidden",

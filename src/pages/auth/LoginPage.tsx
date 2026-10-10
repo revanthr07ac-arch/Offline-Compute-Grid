@@ -69,16 +69,16 @@ export default function LoginPage({ onLogin, onForgotPassword, onCreateAccount }
       >
         <svg width="320" height="130" viewBox="0 0 320 130" fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Lines from center master to workers */}
-          <line x1="160" y1="60" x2="160" y2="15" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
-          <line x1="160" y1="60" x2="260" y2="30" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
-          <line x1="160" y1="60" x2="285" y2="80" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
-          <line x1="160" y1="60" x2="220" y2="115" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
-          <line x1="160" y1="60" x2="100" y2="115" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
-          <line x1="160" y1="60" x2="35" y2="80" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
-          <line x1="160" y1="60" x2="60" y2="30" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
+          <line x1="160" y1="60" x2="160" y2="15" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
+          <line x1="160" y1="60" x2="260" y2="30" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
+          <line x1="160" y1="60" x2="285" y2="80" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
+          <line x1="160" y1="60" x2="220" y2="115" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
+          <line x1="160" y1="60" x2="100" y2="115" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
+          <line x1="160" y1="60" x2="35" y2="80" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
+          <line x1="160" y1="60" x2="60" y2="30" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.19" className="network-line" />
 
           {/* Master node */}
-          <circle cx="160" cy="60" r="18" fill="#4F6FFF" />
+          <circle cx="160" cy="60" r="18" fill="#8B5CF6" />
           <text x="160" y="64" textAnchor="middle" fill="white" fontSize="10" fontWeight="700">M</text>
 
           {/* Worker nodes */}
@@ -121,7 +121,7 @@ export default function LoginPage({ onLogin, onForgotPassword, onCreateAccount }
             style={{
               width: "20px",
               height: "20px",
-              background: "#EEF3FF",
+              background: "#F3E8FF",
               borderRadius: "6px",
               display: "flex",
               alignItems: "center",
@@ -129,13 +129,13 @@ export default function LoginPage({ onLogin, onForgotPassword, onCreateAccount }
             }}
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <circle cx="6" cy="6" r="2.5" fill="#4F6FFF" />
-              <circle cx="6" cy="1.5" r="1" stroke="#4F6FFF" strokeWidth="0.8" strokeOpacity="0.5" fill="none" />
-              <circle cx="10" cy="9" r="1" stroke="#4F6FFF" strokeWidth="0.8" strokeOpacity="0.5" fill="none" />
-              <circle cx="2" cy="9" r="1" stroke="#4F6FFF" strokeWidth="0.8" strokeOpacity="0.5" fill="none" />
-              <line x1="6" y1="2.5" x2="6" y2="3.5" stroke="#4F6FFF" strokeWidth="0.8" strokeOpacity="0.4" />
-              <line x1="9.1" y1="8.1" x2="8.1" y2="7.3" stroke="#4F6FFF" strokeWidth="0.8" strokeOpacity="0.4" />
-              <line x1="2.9" y1="8.1" x2="3.9" y2="7.3" stroke="#4F6FFF" strokeWidth="0.8" strokeOpacity="0.4" />
+              <circle cx="6" cy="6" r="2.5" fill="#8B5CF6" />
+              <circle cx="6" cy="1.5" r="1" stroke="#8B5CF6" strokeWidth="0.8" strokeOpacity="0.5" fill="none" />
+              <circle cx="10" cy="9" r="1" stroke="#8B5CF6" strokeWidth="0.8" strokeOpacity="0.5" fill="none" />
+              <circle cx="2" cy="9" r="1" stroke="#8B5CF6" strokeWidth="0.8" strokeOpacity="0.5" fill="none" />
+              <line x1="6" y1="2.5" x2="6" y2="3.5" stroke="#8B5CF6" strokeWidth="0.8" strokeOpacity="0.4" />
+              <line x1="9.1" y1="8.1" x2="8.1" y2="7.3" stroke="#8B5CF6" strokeWidth="0.8" strokeOpacity="0.4" />
+              <line x1="2.9" y1="8.1" x2="3.9" y2="7.3" stroke="#8B5CF6" strokeWidth="0.8" strokeOpacity="0.4" />
             </svg>
           </div>
           <span style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>Offline Compute Grid</span>
@@ -235,13 +235,13 @@ export default function LoginPage({ onLogin, onForgotPassword, onCreateAccount }
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              style={{ accentColor: "#4F6FFF", width: "15px", height: "15px", cursor: "pointer" }}
+              style={{ accentColor: "#8B5CF6", width: "15px", height: "15px", cursor: "pointer" }}
             />
             <span style={{ fontSize: "14px", color: "#374151" }}>Remember me</span>
           </label>
           <button
             onClick={onForgotPassword}
-            style={{ background: "none", border: "none", cursor: "pointer", fontSize: "14px", color: "#4F6FFF", fontWeight: "500", padding: 0 }}
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: "14px", color: "#8B5CF6", fontWeight: "500", padding: 0 }}
           >
             Forgot password?
           </button>
@@ -308,7 +308,7 @@ export default function LoginPage({ onLogin, onForgotPassword, onCreateAccount }
           {"Don't have an account? "}
           <button
             onClick={onCreateAccount}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "#4F6FFF", fontWeight: "500", fontSize: "14px", padding: 0 }}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "#8B5CF6", fontWeight: "500", fontSize: "14px", padding: 0 }}
           >
             Create account
           </button>

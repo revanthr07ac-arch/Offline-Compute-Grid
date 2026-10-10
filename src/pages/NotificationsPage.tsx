@@ -142,7 +142,7 @@ function iconConfig(type: NotifType): { bg: string; icon: React.ReactNode } {
     case "task_complete":
       return { bg: "#ECFDF5", icon: <CheckCircle size={18} color="#10B981" /> };
     case "worker_joined":
-      return { bg: "#EEF3FF", icon: <Plus size={18} color="#4F6FFF" /> };
+      return { bg: "#F3E8FF", icon: <Plus size={18} color="#8B5CF6" /> };
     case "worker_disconnected":
       return { bg: "#FEF2F2", icon: <WifiOff size={18} color="#EF4444" /> };
     case "task_failed":
@@ -197,7 +197,7 @@ export default function NotificationsPage() {
               top: 0,
               bottom: 0,
               width: 3,
-              background: "#4F6FFF",
+              background: "#8B5CF6",
               borderRadius: "0 2px 2px 0",
             }}
           />
@@ -248,7 +248,7 @@ export default function NotificationsPage() {
               width: 6,
               height: 6,
               borderRadius: "50%",
-              background: "#4F6FFF",
+              background: "#8B5CF6",
               flexShrink: 0,
               marginTop: 6,
             }}
@@ -276,8 +276,8 @@ export default function NotificationsPage() {
           {unreadCount > 0 && (
             <span
               style={{
-                background: "#EEF3FF",
-                color: "#4F6FFF",
+                background: "#F3E8FF",
+                color: "#8B5CF6",
                 fontSize: 12,
                 fontWeight: 600,
                 borderRadius: 10,
@@ -294,7 +294,7 @@ export default function NotificationsPage() {
             style={{
               background: "none",
               border: "none",
-              color: "#4F6FFF",
+              color: "#8B5CF6",
               fontSize: 13,
               fontWeight: 500,
               cursor: "pointer",

@@ -9,7 +9,7 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
         width: 44,
         height: 24,
         borderRadius: 12,
-        backgroundColor: on ? "#4F6FFF" : "#E6EAF0",
+        backgroundColor: on ? "#8B5CF6" : "#E6EAF0",
         position: "relative",
         cursor: "pointer",
         transition: "background-color 0.2s",
@@ -459,7 +459,7 @@ export default function SettingsPage() {
                 />,
                 <SettingRow
                   label="Export Database"
-                  right={{ kind: "chevron", color: "#4F6FFF" }}
+                  right={{ kind: "chevron", color: "#8B5CF6" }}
                 />,
                 <SettingRow
                   label="Restore Database"
@@ -490,7 +490,7 @@ export default function SettingsPage() {
                 />,
                 <SettingRow
                   label="Check for Updates"
-                  right={{ kind: "chevron", color: "#4F6FFF" }}
+                  right={{ kind: "chevron", color: "#8B5CF6" }}
                 />,
                 <SettingRow
                   label="Reset All Settings"

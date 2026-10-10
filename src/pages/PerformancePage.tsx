@@ -123,7 +123,7 @@ export default function PerformancePage() {
   }, []);
 
   const RESOURCE_CARDS = [
-    { label: "CPU Avg", value: "67%", color: "#4F6FFF" },
+    { label: "CPU Avg", value: "67%", color: "#8B5CF6" },
     { label: "Memory", value: "71%", color: "#7C5CFC" },
     { label: "Net In", value: "142 MB/s", color: "#10B981" },
     { label: "Net Out", value: "38 MB/s", color: "#10B981", dashed: true },
@@ -168,7 +168,7 @@ export default function PerformancePage() {
                 padding: "5px 14px",
                 borderRadius: 20,
                 border: "none",
-                background: timeline === t ? "#4F6FFF" : "#F1F4F9",
+                background: timeline === t ? "#8B5CF6" : "#F1F4F9",
                 color: timeline === t ? "#FFFFFF" : "#667085",
                 fontSize: 13,
                 fontWeight: 500,
@@ -226,7 +226,7 @@ export default function PerformancePage() {
                 contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid #E6EAF0" }}
                 labelFormatter={() => ""}
               />
-              <Area type="monotone" dataKey="cpu1" name="Laptop-1" stroke="#4F6FFF" fill="#4F6FFF20" strokeWidth={1.5} dot={false} />
+              <Area type="monotone" dataKey="cpu1" name="Laptop-1" stroke="#8B5CF6" fill="#8B5CF620" strokeWidth={1.5} dot={false} />
               <Area type="monotone" dataKey="cpu2" name="PC-2" stroke="#7C5CFC" fill="#7C5CFC20" strokeWidth={1.5} dot={false} />
               <Area type="monotone" dataKey="cpu3" name="RPi-3" stroke="#10B981" fill="#10B98120" strokeWidth={1.5} dot={false} />
               <Area type="monotone" dataKey="cpu4" name="Mac-5" stroke="#F59E0B" fill="#F59E0B20" strokeWidth={1.5} dot={false} />
@@ -265,7 +265,7 @@ export default function PerformancePage() {
               <XAxis dataKey="t" tick={{ fontSize: 10, fill: "#98A2B3" }} tickLine={false} axisLine={false} />
               <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid #E6EAF0" }} labelFormatter={() => ""} />
               <Line type="monotone" dataKey="netDown" name="Download" stroke="#10B981" strokeWidth={1.5} dot={false} />
-              <Line type="monotone" dataKey="netUp" name="Upload" stroke="#4F6FFF" strokeWidth={1.5} dot={false} />
+              <Line type="monotone" dataKey="netUp" name="Upload" stroke="#8B5CF6" strokeWidth={1.5} dot={false} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} iconType="circle" iconSize={6} />
             </LineChart>
           </ResponsiveContainer>
@@ -309,7 +309,7 @@ export default function PerformancePage() {
                       {row.node}
                     </td>
                     <td style={{ padding: "6px 8px", minWidth: 70 }}>
-                      <MiniBar value={row.cpu} color="#4F6FFF" />
+                      <MiniBar value={row.cpu} color="#8B5CF6" />
                     </td>
                     <td style={{ padding: "6px 8px", minWidth: 70 }}>
                       <MiniBar value={row.ram} color="#7C5CFC" />

@@ -43,8 +43,8 @@ const FILTERS: { key: FilterType; label: string }[] = [
 
 function DeviceIcon({ type, size = 36 }: { type: DeviceType["type"]; size?: number }) {
   const configs: Record<DeviceType["type"], { bg: string; color: string; Icon: React.ElementType }> = {
-    Laptop:  { bg: "#EEF3FF", color: "#4F6FFF", Icon: Laptop },
-    Mac:     { bg: "#EEF3FF", color: "#4F6FFF", Icon: Laptop },
+    Laptop:  { bg: "#F3E8FF", color: "#8B5CF6", Icon: Laptop },
+    Mac:     { bg: "#F3E8FF", color: "#8B5CF6", Icon: Laptop },
     PC:      { bg: "#F3F0FF", color: "#7C5CFC", Icon: Monitor },
     Pi:      { bg: "#ECFDF5", color: "#10B981", Icon: CircuitBoard },
     Android: { bg: "#FFF7ED", color: "#F59E0B", Icon: Smartphone },
@@ -61,7 +61,7 @@ function DeviceIcon({ type, size = 36 }: { type: DeviceType["type"]; size?: numb
 function StatusBadge({ status }: { status: DeviceType["status"] }) {
   const configs: Record<DeviceType["status"], { bg: string; color: string; dot: string; pulse: boolean; label: string }> = {
     online:  { bg: "#ECFDF5", color: "#10B981", dot: "●", pulse: true,  label: "Online" },
-    busy:    { bg: "#EEF3FF", color: "#4F6FFF", dot: "●", pulse: true,  label: "Busy" },
+    busy:    { bg: "#F3E8FF", color: "#8B5CF6", dot: "●", pulse: true,  label: "Busy" },
     idle:    { bg: "#F1F4F9", color: "#667085", dot: "○", pulse: false, label: "Idle" },
     offline: { bg: "#FEF2F2", color: "#EF4444", dot: "○", pulse: false, label: "Offline" },
   };
@@ -128,7 +128,7 @@ function DeviceCard({ device, onDeviceSelect }: { device: DeviceType; onDeviceSe
             </span>
             <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
               {device.task && (
-                <span style={{ background: "#EEF3FF", color: "#4F6FFF", borderRadius: 20, padding: "2px 7px", fontSize: 11, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 3, whiteSpace: "nowrap" }}>
+                <span style={{ background: "#F3E8FF", color: "#8B5CF6", borderRadius: 20, padding: "2px 7px", fontSize: 11, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 3, whiteSpace: "nowrap" }}>
                   <Zap size={10} />
                   {device.task}
                 </span>
@@ -152,7 +152,7 @@ function DeviceCard({ device, onDeviceSelect }: { device: DeviceType; onDeviceSe
 
       {/* Metrics 2x2 grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 20px", marginTop: 12 }}>
-        <MetricCell label="CPU" value={device.cpu} color="#4F6FFF" />
+        <MetricCell label="CPU" value={device.cpu} color="#8B5CF6" />
         <MetricCell label="RAM" value={device.ram} color="#7C5CFC" />
         <MetricCell label="Storage" value={device.storage} color="#10B981" />
         <BatteryCell battery={device.battery} />
@@ -179,10 +179,15 @@ export default function DevicesPage({ onDeviceSelect }: DevicesPageProps) {
   const [devices, setDevices] = useState<DeviceType[]>([]);
 
   useEffect(() => {
-    fetch('/api/devices')
-      .then(res => res.json())
-      .then(data => setDevices(data))
-      .catch(err => console.error("Failed to fetch devices", err));
+    const fetchDevices = () => {
+      fetch('/api/devices')
+        .then(res => res.json())
+        .then(data => setDevices(data))
+        .catch(err => console.error("Failed to fetch devices", err));
+    };
+    fetchDevices();
+    const interval = setInterval(fetchDevices, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const filtered = useMemo(() => {
@@ -222,7 +227,7 @@ export default function DevicesPage({ onDeviceSelect }: DevicesPageProps) {
           />
         </div>
         <button
-          style={{ background: "#EEF3FF", color: "#4F6FFF", border: "none", borderRadius: 10, height: 40, padding: "0 12px", fontSize: 14, fontWeight: 500, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}
+          style={{ background: "#F3E8FF", color: "#8B5CF6", border: "none", borderRadius: 10, height: 40, padding: "0 12px", fontSize: 14, fontWeight: 500, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}
         >
           <Radar size={16} />
           Discover
@@ -237,7 +242,7 @@ export default function DevicesPage({ onDeviceSelect }: DevicesPageProps) {
             onClick={() => setActiveFilter(f.key)}
             style={{
               flexShrink: 0,
-              background: activeFilter === f.key ? "#4F6FFF" : "#F1F4F9",
+              background: activeFilter === f.key ? "#8B5CF6" : "#F1F4F9",
               color: activeFilter === f.key ? "#FFFFFF" : "#667085",
               border: "none",
               borderRadius: 20,

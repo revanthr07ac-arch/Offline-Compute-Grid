@@ -40,7 +40,7 @@ export default function BottomNav() {
             height: 56,
             gap: 3,
             textDecoration: "none",
-            color: isActive ? "#4F6FFF" : "#98A2B3",
+            color: isActive ? "#8B5CF6" : "#98A2B3",
             fontSize: 10,
             fontWeight: isActive ? 600 : 400,
           })}
@@ -52,14 +52,14 @@ export default function BottomNav() {
                   width: 28,
                   height: 24,
                   borderRadius: 8,
-                  background: isActive ? "#EEF3FF" : "transparent",
+                  background: isActive ? "#F3E8FF" : "transparent",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   transition: "background 0.15s",
                 }}
               >
-                <Icon size={18} style={{ color: isActive ? "#4F6FFF" : "#98A2B3" }} />
+                <Icon size={18} style={{ color: isActive ? "#8B5CF6" : "#98A2B3" }} />
               </div>
               <span>{label}</span>
             </>

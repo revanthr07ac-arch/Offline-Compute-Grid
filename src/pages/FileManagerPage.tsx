@@ -51,9 +51,9 @@ function getFileIconConfig(type: FileItem["type"]) {
     case "document":
       return { bg: "#ECFDF5", icon: <FileText size={32} color="#10B981" /> };
     case "python":
-      return { bg: "#EEF3FF", icon: <Code2 size={32} color="#4F6FFF" /> };
+      return { bg: "#F3E8FF", icon: <Code2 size={32} color="#8B5CF6" /> };
     case "image":
-      return { bg: "#EEF3FF", icon: <Image size={32} color="#4F6FFF" /> };
+      return { bg: "#F3E8FF", icon: <Image size={32} color="#8B5CF6" /> };
   }
 }
 
@@ -66,9 +66,9 @@ function getSmallIcon(type: FileItem["type"]) {
     case "document":
       return <FileText size={24} color="#10B981" />;
     case "python":
-      return <Code2 size={24} color="#4F6FFF" />;
+      return <Code2 size={24} color="#8B5CF6" />;
     case "image":
-      return <Image size={24} color="#4F6FFF" />;
+      return <Image size={24} color="#8B5CF6" />;
   }
 }
 
@@ -148,7 +148,7 @@ export default function FileManagerPage({ onFileSelect }: Props) {
             height: 36,
             border: "none",
             borderRadius: 10,
-            background: viewMode === "grid" ? "#EEF3FF" : "transparent",
+            background: viewMode === "grid" ? "#F3E8FF" : "transparent",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -156,7 +156,7 @@ export default function FileManagerPage({ onFileSelect }: Props) {
             flexShrink: 0,
           }}
         >
-          <LayoutGrid size={16} color={viewMode === "grid" ? "#4F6FFF" : "#667085"} />
+          <LayoutGrid size={16} color={viewMode === "grid" ? "#8B5CF6" : "#667085"} />
         </button>
         <button
           onClick={() => setViewMode("list")}
@@ -165,7 +165,7 @@ export default function FileManagerPage({ onFileSelect }: Props) {
             height: 36,
             border: "none",
             borderRadius: 10,
-            background: viewMode === "list" ? "#EEF3FF" : "transparent",
+            background: viewMode === "list" ? "#F3E8FF" : "transparent",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -173,7 +173,7 @@ export default function FileManagerPage({ onFileSelect }: Props) {
             flexShrink: 0,
           }}
         >
-          <List size={16} color={viewMode === "list" ? "#4F6FFF" : "#667085"} />
+          <List size={16} color={viewMode === "list" ? "#8B5CF6" : "#667085"} />
         </button>
       </div>
 
@@ -185,14 +185,14 @@ export default function FileManagerPage({ onFileSelect }: Props) {
               width: 40,
               height: 40,
               borderRadius: 10,
-              background: "#EEF3FF",
+              background: "#F3E8FF",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
             }}
           >
-            <HardDrive size={20} color="#4F6FFF" />
+            <HardDrive size={20} color="#8B5CF6" />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
@@ -212,7 +212,7 @@ export default function FileManagerPage({ onFileSelect }: Props) {
                 style={{
                   width: "48%",
                   height: "100%",
-                  background: "linear-gradient(90deg, #4F6FFF, #7C5CFC)",
+                  background: "linear-gradient(90deg, #8B5CF6, #7C5CFC)",
                   borderRadius: 2,
                 }}
               />
@@ -244,7 +244,7 @@ export default function FileManagerPage({ onFileSelect }: Props) {
               padding: "6px 12px",
               borderRadius: 20,
               border: "none",
-              background: activeFolder === f.id ? "#4F6FFF" : "#F1F4F9",
+              background: activeFolder === f.id ? "#8B5CF6" : "#F1F4F9",
               color: activeFolder === f.id ? "#FFFFFF" : "#667085",
               fontSize: 13,
               fontWeight: 500,

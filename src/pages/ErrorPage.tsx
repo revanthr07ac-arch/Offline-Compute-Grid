@@ -24,11 +24,11 @@ function OfflineSVG() {
   return (
     <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="50" cy="50" r="48" stroke="#E6EAF0" strokeWidth="2" />
-      <circle cx="50" cy="50" r="10" fill="#4F6FFF" fillOpacity="0.2" stroke="#4F6FFF" strokeWidth="1.5" strokeOpacity="0.4" />
-      <circle cx="20" cy="30" r="6" fill="#E6EAF0" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.3" />
-      <circle cx="80" cy="30" r="6" fill="#E6EAF0" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.3" />
-      <circle cx="20" cy="70" r="6" fill="#E6EAF0" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.3" />
-      <circle cx="80" cy="70" r="6" fill="#E6EAF0" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.3" />
+      <circle cx="50" cy="50" r="10" fill="#8B5CF6" fillOpacity="0.2" stroke="#8B5CF6" strokeWidth="1.5" strokeOpacity="0.4" />
+      <circle cx="20" cy="30" r="6" fill="#E6EAF0" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.3" />
+      <circle cx="80" cy="30" r="6" fill="#E6EAF0" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.3" />
+      <circle cx="20" cy="70" r="6" fill="#E6EAF0" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.3" />
+      <circle cx="80" cy="70" r="6" fill="#E6EAF0" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.3" />
       <line x1="26" y1="33" x2="44" y2="45" stroke="#E6EAF0" strokeWidth="1.5" strokeDasharray="3 3" />
       <line x1="74" y1="33" x2="56" y2="45" stroke="#E6EAF0" strokeWidth="1.5" strokeDasharray="3 3" />
       <line x1="26" y1="67" x2="44" y2="55" stroke="#E6EAF0" strokeWidth="1.5" strokeDasharray="3 3" />
@@ -44,11 +44,11 @@ function FourOhFourSVG() {
   return (
     <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="5" y="20" width="90" height="60" rx="8" stroke="#E6EAF0" strokeWidth="2" />
-      <circle cx="25" cy="40" r="5" fill="#4F6FFF" fillOpacity="0.2" stroke="#4F6FFF" strokeWidth="1.5" strokeOpacity="0.5" />
-      <circle cx="50" cy="40" r="5" fill="#4F6FFF" fillOpacity="0.2" stroke="#4F6FFF" strokeWidth="1.5" strokeOpacity="0.5" />
-      <circle cx="75" cy="40" r="5" fill="#4F6FFF" fillOpacity="0.2" stroke="#4F6FFF" strokeWidth="1.5" strokeOpacity="0.5" />
+      <circle cx="25" cy="40" r="5" fill="#8B5CF6" fillOpacity="0.2" stroke="#8B5CF6" strokeWidth="1.5" strokeOpacity="0.5" />
+      <circle cx="50" cy="40" r="5" fill="#8B5CF6" fillOpacity="0.2" stroke="#8B5CF6" strokeWidth="1.5" strokeOpacity="0.5" />
+      <circle cx="75" cy="40" r="5" fill="#8B5CF6" fillOpacity="0.2" stroke="#8B5CF6" strokeWidth="1.5" strokeOpacity="0.5" />
       <circle cx="25" cy="60" r="5" fill="#E6EAF0" />
-      <circle cx="50" cy="60" r="5" fill="#4F6FFF" fillOpacity="0.15" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.3" />
+      <circle cx="50" cy="60" r="5" fill="#8B5CF6" fillOpacity="0.15" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.3" />
       <circle cx="75" cy="60" r="5" fill="#E6EAF0" />
       <line x1="25" y1="45" x2="25" y2="55" stroke="#E6EAF0" strokeWidth="1.5" />
       <line x1="50" y1="45" x2="50" y2="55" stroke="#E6EAF0" strokeWidth="1.5" />
@@ -68,8 +68,8 @@ function ServerSVG() {
       <circle cx="75" cy="26" r="4" fill="#EF4444" fillOpacity="0.3" stroke="#EF4444" strokeWidth="1" strokeOpacity="0.5" />
       <circle cx="75" cy="53" r="4" fill="#EF4444" fillOpacity="0.3" stroke="#EF4444" strokeWidth="1" strokeOpacity="0.5" />
       <circle cx="75" cy="77" r="4" fill="#E6EAF0" />
-      <rect x="23" y="22" width="30" height="8" rx="2" fill="#4F6FFF" fillOpacity="0.1" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.2" />
-      <rect x="23" y="49" width="30" height="8" rx="2" fill="#4F6FFF" fillOpacity="0.1" stroke="#4F6FFF" strokeWidth="1" strokeOpacity="0.2" />
+      <rect x="23" y="22" width="30" height="8" rx="2" fill="#8B5CF6" fillOpacity="0.1" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.2" />
+      <rect x="23" y="49" width="30" height="8" rx="2" fill="#8B5CF6" fillOpacity="0.1" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.2" />
     </svg>
   );
 }
@@ -88,8 +88,8 @@ const config: Record<
 > = {
   "404": {
     svg: <FourOhFourSVG />,
-    iconBg: "#EEF3FF",
-    icon: <Search size={32} color="#4F6FFF" />,
+    iconBg: "#F3E8FF",
+    icon: <Search size={32} color="#8B5CF6" />,
     title: "Page Not Found",
     description:
       "The page you are looking for does not exist or has been moved to a different location.",
@@ -252,7 +252,7 @@ export default function ErrorPage({
           style={{
             height: 48,
             borderRadius: 12,
-            backgroundColor: "#4F6FFF",
+            backgroundColor: "#8B5CF6",
             color: "#FFFFFF",
             border: "none",
             fontSize: 15,

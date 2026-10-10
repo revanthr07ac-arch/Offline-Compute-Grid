@@ -70,21 +70,21 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         >
           <svg width="48" height="48" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
             {/* Lines from center to outer nodes */}
-            <line x1="36" y1="36" x2="36" y2="12" stroke="#4F6FFF" strokeWidth="1.2" strokeOpacity="0.4" />
-            <line x1="36" y1="36" x2="56" y2="22" stroke="#4F6FFF" strokeWidth="1.2" strokeOpacity="0.4" />
-            <line x1="36" y1="36" x2="58" y2="46" stroke="#4F6FFF" strokeWidth="1.2" strokeOpacity="0.4" />
-            <line x1="36" y1="36" x2="36" y2="60" stroke="#4F6FFF" strokeWidth="1.2" strokeOpacity="0.4" />
-            <line x1="36" y1="36" x2="16" y2="46" stroke="#4F6FFF" strokeWidth="1.2" strokeOpacity="0.4" />
-            <line x1="36" y1="36" x2="14" y2="22" stroke="#4F6FFF" strokeWidth="1.2" strokeOpacity="0.4" />
+            <line x1="36" y1="36" x2="36" y2="12" stroke="#8B5CF6" strokeWidth="1.2" strokeOpacity="0.4" />
+            <line x1="36" y1="36" x2="56" y2="22" stroke="#8B5CF6" strokeWidth="1.2" strokeOpacity="0.4" />
+            <line x1="36" y1="36" x2="58" y2="46" stroke="#8B5CF6" strokeWidth="1.2" strokeOpacity="0.4" />
+            <line x1="36" y1="36" x2="36" y2="60" stroke="#8B5CF6" strokeWidth="1.2" strokeOpacity="0.4" />
+            <line x1="36" y1="36" x2="16" y2="46" stroke="#8B5CF6" strokeWidth="1.2" strokeOpacity="0.4" />
+            <line x1="36" y1="36" x2="14" y2="22" stroke="#8B5CF6" strokeWidth="1.2" strokeOpacity="0.4" />
             {/* Outer nodes */}
-            <circle cx="36" cy="12" r="5" stroke="#4F6FFF" strokeWidth="1.5" fill="white" strokeOpacity="0.5" />
-            <circle cx="56" cy="22" r="5" stroke="#4F6FFF" strokeWidth="1.5" fill="white" strokeOpacity="0.5" />
-            <circle cx="58" cy="46" r="5" stroke="#4F6FFF" strokeWidth="1.5" fill="white" strokeOpacity="0.5" />
-            <circle cx="36" cy="60" r="5" stroke="#4F6FFF" strokeWidth="1.5" fill="white" strokeOpacity="0.5" />
-            <circle cx="16" cy="46" r="5" stroke="#4F6FFF" strokeWidth="1.5" fill="white" strokeOpacity="0.5" />
-            <circle cx="14" cy="22" r="5" stroke="#4F6FFF" strokeWidth="1.5" fill="white" strokeOpacity="0.5" />
+            <circle cx="36" cy="12" r="5" stroke="#8B5CF6" strokeWidth="1.5" fill="white" strokeOpacity="0.5" />
+            <circle cx="56" cy="22" r="5" stroke="#8B5CF6" strokeWidth="1.5" fill="white" strokeOpacity="0.5" />
+            <circle cx="58" cy="46" r="5" stroke="#8B5CF6" strokeWidth="1.5" fill="white" strokeOpacity="0.5" />
+            <circle cx="36" cy="60" r="5" stroke="#8B5CF6" strokeWidth="1.5" fill="white" strokeOpacity="0.5" />
+            <circle cx="16" cy="46" r="5" stroke="#8B5CF6" strokeWidth="1.5" fill="white" strokeOpacity="0.5" />
+            <circle cx="14" cy="22" r="5" stroke="#8B5CF6" strokeWidth="1.5" fill="white" strokeOpacity="0.5" />
             {/* Center node */}
-            <circle cx="36" cy="36" r="8" fill="#4F6FFF" />
+            <circle cx="36" cy="36" r="8" fill="#8B5CF6" />
           </svg>
         </div>
 
@@ -128,7 +128,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
               width: "6px",
               height: "6px",
               borderRadius: "50%",
-              background: "#4F6FFF",
+              background: "#8B5CF6",
               animation: `pulse-dot 1.2s ease-in-out ${i * 0.2}s infinite`,
             }}
           />

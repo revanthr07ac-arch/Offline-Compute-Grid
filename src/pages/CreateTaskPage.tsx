@@ -18,7 +18,7 @@ const TYPE_PILLS = ["Video", "Image", "Python", "Document", "Compression", "Cust
 const PRIORITY_OPTIONS = [
   { key: "critical", label: "Critical", bg: "#FEF2F2", color: "#EF4444" },
   { key: "high", label: "High", bg: "#FFF7ED", color: "#F59E0B" },
-  { key: "medium", label: "Medium", bg: "#EEF3FF", color: "#4F6FFF" },
+  { key: "medium", label: "Medium", bg: "#F3E8FF", color: "#8B5CF6" },
   { key: "low", label: "Low", bg: "#F1F4F9", color: "#667085" },
 ];
 const FILE_TYPE_CARDS = [
@@ -29,7 +29,7 @@ const FILE_TYPE_CARDS = [
 ];
 const SOURCE_BUTTONS = ["Camera", "Files App", "Gallery"];
 const WORKER_OPTIONS = [
-  { id: "w1", name: "RPi-4 Node A", cpu: 28, ram: 45, online: true, color: "#4F6FFF" },
+  { id: "w1", name: "RPi-4 Node A", cpu: 28, ram: 45, online: true, color: "#8B5CF6" },
   { id: "w2", name: "RPi-4 Node B", cpu: 51, ram: 62, online: true, color: "#7C5CFC" },
   { id: "w3", name: "x86 Worker-1", cpu: 14, ram: 33, online: true, color: "#10B981" },
   { id: "w4", name: "x86 Worker-2", cpu: 67, ram: 78, online: true, color: "#F59E0B" },
@@ -127,7 +127,7 @@ export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPagePr
               style={{
                 flex: 1,
                 height: 4,
-                background: i < currentStep ? "#4F6FFF" : "#F1F4F9",
+                background: i < currentStep ? "#8B5CF6" : "#F1F4F9",
                 transition: "background 0.3s",
               }}
             />
@@ -158,8 +158,8 @@ export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPagePr
                 setSelectedFiles((prev) => [...prev, ...names]);
               }}
               style={{
-                background: isDragging ? "#EEF3FF" : "#F7F9FC",
-                border: `2px dashed ${isDragging ? "#4F6FFF" : "#E6EAF0"}`,
+                background: isDragging ? "#F3E8FF" : "#F7F9FC",
+                border: `2px dashed ${isDragging ? "#8B5CF6" : "#E6EAF0"}`,
                 borderRadius: 16,
                 padding: "40px 24px",
                 textAlign: "center",
@@ -168,7 +168,7 @@ export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPagePr
               }}
               onClick={() => setSelectedFiles((prev) => [...prev, `file-${Date.now()}.mp4`])}
             >
-              <UploadCloud size={48} color="#4F6FFF" style={{ margin: "0 auto 12px" }} />
+              <UploadCloud size={48} color="#8B5CF6" style={{ margin: "0 auto 12px" }} />
               <div style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
                 Tap to choose file
               </div>
@@ -189,9 +189,9 @@ export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPagePr
                     textAlign: "center",
                     cursor: "pointer",
                     border: selectedFileType === ft.label
-                      ? "2px solid #4F6FFF"
+                      ? "2px solid #8B5CF6"
                       : "1px solid #E6EAF0",
-                    background: selectedFileType === ft.label ? "#EEF3FF" : "#FFFFFF",
+                    background: selectedFileType === ft.label ? "#F3E8FF" : "#FFFFFF",
                   }}
                 >
                   <div style={{ fontSize: 28 }}>{ft.emoji}</div>
@@ -233,8 +233,8 @@ export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPagePr
                   <span
                     key={i}
                     style={{
-                      background: "#EEF3FF",
-                      color: "#4F6FFF",
+                      background: "#F3E8FF",
+                      color: "#8B5CF6",
                       fontSize: 12,
                       fontWeight: 500,
                       borderRadius: 99,
@@ -278,9 +278,9 @@ export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPagePr
                       flexShrink: 0,
                       padding: "7px 14px",
                       borderRadius: 99,
-                      border: taskType === t ? "1.5px solid #4F6FFF" : "1.5px solid #E6EAF0",
-                      background: taskType === t ? "#EEF3FF" : "#FFFFFF",
-                      color: taskType === t ? "#4F6FFF" : "#667085",
+                      border: taskType === t ? "1.5px solid #8B5CF6" : "1.5px solid #E6EAF0",
+                      background: taskType === t ? "#F3E8FF" : "#FFFFFF",
+                      color: taskType === t ? "#8B5CF6" : "#667085",
                       fontSize: 13,
                       fontWeight: 500,
                       cursor: "pointer",
@@ -329,7 +329,7 @@ export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPagePr
                   max={50}
                   value={splitSize}
                   onChange={(e) => setSplitSize(Number(e.target.value))}
-                  style={{ flex: 1, accentColor: "#4F6FFF" }}
+                  style={{ flex: 1, accentColor: "#8B5CF6" }}
                 />
                 <span style={{ fontSize: 13, color: "#111827", fontWeight: 600, minWidth: 28, textAlign: "right" }}>
                   {splitSize}
@@ -364,8 +364,8 @@ export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPagePr
               <button
                 onClick={() => setSelectedWorkers(WORKER_OPTIONS.filter((w) => w.online).map((w) => w.id))}
                 style={{
-                  background: "#EEF3FF",
-                  color: "#4F6FFF",
+                  background: "#F3E8FF",
+                  color: "#8B5CF6",
                   border: "none",
                   borderRadius: 8,
                   padding: "6px 12px",
@@ -391,8 +391,8 @@ export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPagePr
                     alignItems: "center",
                     gap: 12,
                     cursor: "pointer",
-                    border: selected ? `1.5px solid #4F6FFF` : "1px solid #E6EAF0",
-                    background: selected ? "#EEF3FF08" : "#FFFFFF",
+                    border: selected ? `1.5px solid #8B5CF6` : "1px solid #E6EAF0",
+                    background: selected ? "#F3E8FF08" : "#FFFFFF",
                     opacity: w.online ? 1 : 0.5,
                   }}
                 >
@@ -436,7 +436,7 @@ export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPagePr
                       height: 20,
                       borderRadius: 5,
                       border: selected ? "none" : "1.5px solid #E6EAF0",
-                      background: selected ? "#4F6FFF" : "#FFFFFF",
+                      background: selected ? "#8B5CF6" : "#FFFFFF",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -514,7 +514,7 @@ export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPagePr
                       style={{
                         background: "none",
                         border: "none",
-                        color: "#4F6FFF",
+                        color: "#8B5CF6",
                         fontSize: 13,
                         fontWeight: 500,
                         cursor: "pointer",

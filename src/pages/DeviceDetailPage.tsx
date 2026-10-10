@@ -29,8 +29,8 @@ interface DeviceDetailPageProps {
 
 function DeviceIcon({ type, size = 48 }: { type: DeviceType["type"]; size?: number }) {
   const configs: Record<DeviceType["type"], { bg: string; color: string; Icon: React.ElementType }> = {
-    Laptop:  { bg: "#EEF3FF", color: "#4F6FFF", Icon: Laptop },
-    Mac:     { bg: "#EEF3FF", color: "#4F6FFF", Icon: Laptop },
+    Laptop:  { bg: "#F3E8FF", color: "#8B5CF6", Icon: Laptop },
+    Mac:     { bg: "#F3E8FF", color: "#8B5CF6", Icon: Laptop },
     PC:      { bg: "#F3F0FF", color: "#7C5CFC", Icon: Monitor },
     Pi:      { bg: "#ECFDF5", color: "#10B981", Icon: CircuitBoard },
     Android: { bg: "#FFF7ED", color: "#F59E0B", Icon: Smartphone },
@@ -48,7 +48,7 @@ function DeviceIcon({ type, size = 48 }: { type: DeviceType["type"]; size?: numb
 function StatusBadge({ status }: { status: DeviceType["status"] }) {
   const configs: Record<DeviceType["status"], { bg: string; color: string; dot: string; pulse: boolean; label: string }> = {
     online:  { bg: "#ECFDF5", color: "#10B981", dot: "●", pulse: true,  label: "Online" },
-    busy:    { bg: "#EEF3FF", color: "#4F6FFF", dot: "●", pulse: true,  label: "Busy" },
+    busy:    { bg: "#F3E8FF", color: "#8B5CF6", dot: "●", pulse: true,  label: "Busy" },
     idle:    { bg: "#F1F4F9", color: "#667085", dot: "○", pulse: false, label: "Idle" },
     offline: { bg: "#FEF2F2", color: "#EF4444", dot: "○", pulse: false, label: "Offline" },
   };
@@ -118,10 +118,15 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
   const [device, setDevice] = React.useState<DeviceType | null>(null);
 
   React.useEffect(() => {
-    fetch(`/api/devices/${deviceId}`)
-      .then(res => res.json())
-      .then(data => setDevice(data))
-      .catch(err => console.error("Failed to fetch device", err));
+    const fetchDevice = () => {
+      fetch(`/api/devices/${deviceId}`)
+        .then(res => res.json())
+        .then(data => setDevice(data))
+        .catch(err => console.error("Failed to fetch device", err));
+    };
+    fetchDevice();
+    const interval = setInterval(fetchDevice, 3000);
+    return () => clearInterval(interval);
   }, [deviceId]);
 
   const [activeTab, setActiveTab] = React.useState("overview");
@@ -164,7 +169,7 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
             <div className="mono" style={{ fontSize: 13, color: "#667085", marginTop: 8 }}>{device.ip}</div>
             <div className="mono" style={{ fontSize: 12, color: "#98A2B3" }}>{device.hostname}</div>
             {device.task && (
-              <span style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 4, background: "#EEF3FF", color: "#4F6FFF", borderRadius: 20, padding: "3px 9px", fontSize: 12, fontWeight: 500 }}>
+              <span style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 4, background: "#F3E8FF", color: "#8B5CF6", borderRadius: 20, padding: "3px 9px", fontSize: 12, fontWeight: 500 }}>
                 <Zap size={11} />
                 {device.task}
               </span>
@@ -179,7 +184,7 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
 
       {/* Metrics 2x2 grid */}
       <div style={{ margin: "12px 16px 0", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        <MetricCard label="CPU Usage" value={device.cpu} displayValue={`${device.cpu}%`} color="#4F6FFF" />
+        <MetricCard label="CPU Usage" value={device.cpu} displayValue={`${device.cpu}%`} color="#8B5CF6" />
         <MetricCard label="RAM Usage" value={device.ram} displayValue={`${device.ram}%`} color="#7C5CFC" />
         <MetricCard label="Storage" value={device.storage} displayValue={`${device.storage}%`} color="#10B981" />
         {device.battery !== null ? (
@@ -199,8 +204,8 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
           <AreaChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="cpuGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#4F6FFF" stopOpacity={0.18} />
-                <stop offset="95%" stopColor="#4F6FFF" stopOpacity={0.01} />
+                <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.18} />
+                <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.01} />
               </linearGradient>
             </defs>
             <Tooltip
@@ -208,7 +213,7 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
               formatter={(v) => [`${v}%`, "CPU"]}
               labelFormatter={() => ""}
             />
-            <Area type="monotone" dataKey="v" stroke="#4F6FFF" strokeWidth={2} fill="url(#cpuGrad)" dot={false} />
+            <Area type="monotone" dataKey="v" stroke="#8B5CF6" strokeWidth={2} fill="url(#cpuGrad)" dot={false} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -219,7 +224,7 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
         {device.task ? (
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <Zap size={15} color="#4F6FFF" />
+              <Zap size={15} color="#8B5CF6" />
               <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{device.task}</span>
             </div>
             <div style={{ marginBottom: 6 }}>
@@ -228,18 +233,18 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
                 <span>67%</span>
               </div>
               <div style={{ background: "#F1F4F9", borderRadius: 4, height: 6 }}>
-                <div style={{ width: "67%", height: "100%", background: "#4F6FFF", borderRadius: 4 }} />
+                <div style={{ width: "67%", height: "100%", background: "#8B5CF6", borderRadius: 4 }} />
               </div>
             </div>
             <div style={{ fontSize: 12, color: "#98A2B3", marginBottom: 12 }}>ETA: ~8 min remaining</div>
-            <button style={{ background: "#EEF3FF", color: "#4F6FFF", border: "none", borderRadius: 10, padding: "8px 16px", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
+            <button style={{ background: "#F3E8FF", color: "#8B5CF6", border: "none", borderRadius: 10, padding: "8px 16px", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
               View Task
             </button>
           </div>
         ) : (
           <div style={{ textAlign: "center", padding: "16px 0" }}>
             <div style={{ fontSize: 13, color: "#98A2B3", marginBottom: 12 }}>No active task</div>
-            <button style={{ background: "#EEF3FF", color: "#4F6FFF", border: "none", borderRadius: 10, padding: "9px 18px", fontSize: 13, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <button style={{ background: "#F3E8FF", color: "#8B5CF6", border: "none", borderRadius: 10, padding: "9px 18px", fontSize: 13, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
               <PlusCircle size={15} />
               Assign Task
             </button>

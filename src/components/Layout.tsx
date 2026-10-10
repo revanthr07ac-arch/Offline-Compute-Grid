@@ -76,7 +76,7 @@ export default function Layout({ children }: LayoutProps) {
             gap: 10,
           }}
         >
-          <Grid2x2 size={28} style={{ color: "#4F6FFF", flexShrink: 0 }} />
+          <Grid2x2 size={28} style={{ color: "#8B5CF6", flexShrink: 0 }} />
           <span
             style={{
               fontSize: 13,
@@ -115,8 +115,8 @@ export default function Layout({ children }: LayoutProps) {
                 textDecoration: "none",
                 fontSize: 14,
                 fontWeight: 500,
-                background: isActive ? "#EEF3FF" : "transparent",
-                color: isActive ? "#4F6FFF" : "#667085",
+                background: isActive ? "#F3E8FF" : "transparent",
+                color: isActive ? "#8B5CF6" : "#667085",
                 transition: "background 0.15s",
               })}
             >
@@ -125,7 +125,7 @@ export default function Layout({ children }: LayoutProps) {
                   <Icon
                     size={18}
                     style={{
-                      color: isActive ? "#4F6FFF" : "#98A2B3",
+                      color: isActive ? "#8B5CF6" : "#98A2B3",
                       flexShrink: 0,
                     }}
                   />
@@ -191,7 +191,7 @@ export default function Layout({ children }: LayoutProps) {
 
         {/* Mobile left: logo */}
         <div className="flex lg:hidden items-center px-4 gap-2">
-          <Grid2x2 size={20} style={{ color: "#4F6FFF" }} />
+          <Grid2x2 size={20} style={{ color: "#8B5CF6" }} />
           <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
             Offline Compute Grid
           </span>
@@ -274,7 +274,7 @@ export default function Layout({ children }: LayoutProps) {
               width: 36,
               height: 36,
               borderRadius: "50%",
-              background: "linear-gradient(135deg, #4F6FFF, #7C5CFC)",
+              background: "linear-gradient(135deg, #8B5CF6, #7C5CFC)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -353,7 +353,7 @@ export default function Layout({ children }: LayoutProps) {
               width: 32,
               height: 32,
               borderRadius: "50%",
-              background: "linear-gradient(135deg, #4F6FFF, #7C5CFC)",
+              background: "linear-gradient(135deg, #8B5CF6, #7C5CFC)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

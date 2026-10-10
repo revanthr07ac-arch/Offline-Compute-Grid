@@ -206,15 +206,15 @@ export default function CreateAccountPage({ onBack, onCreated }: CreateAccountPa
             type="checkbox"
             checked={termsAccepted}
             onChange={(e) => setTermsAccepted(e.target.checked)}
-            style={{ accentColor: "#4F6FFF", width: "15px", height: "15px", marginTop: "2px", cursor: "pointer", flexShrink: 0 }}
+            style={{ accentColor: "#8B5CF6", width: "15px", height: "15px", marginTop: "2px", cursor: "pointer", flexShrink: 0 }}
           />
           <span style={{ fontSize: "14px", color: "#374151", lineHeight: "1.5" }}>
             I agree to the{" "}
-            <button style={{ background: "none", border: "none", cursor: "pointer", color: "#4F6FFF", fontWeight: "500", fontSize: "14px", padding: 0 }}>
+            <button style={{ background: "none", border: "none", cursor: "pointer", color: "#8B5CF6", fontWeight: "500", fontSize: "14px", padding: 0 }}>
               Terms of Service
             </button>
             {" "}and{" "}
-            <button style={{ background: "none", border: "none", cursor: "pointer", color: "#4F6FFF", fontWeight: "500", fontSize: "14px", padding: 0 }}>
+            <button style={{ background: "none", border: "none", cursor: "pointer", color: "#8B5CF6", fontWeight: "500", fontSize: "14px", padding: 0 }}>
               Privacy Policy
             </button>
           </span>
@@ -277,7 +277,7 @@ export default function CreateAccountPage({ onBack, onCreated }: CreateAccountPa
           Already have an account?{" "}
           <button
             onClick={onBack}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "#4F6FFF", fontWeight: "500", fontSize: "14px", padding: 0 }}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "#8B5CF6", fontWeight: "500", fontSize: "14px", padding: 0 }}
           >
             Sign in
           </button>
