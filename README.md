@@ -1,55 +1,54 @@
-# Offline Compute Grid UI/UX
+# Decentralized Offline Compute Grid
 
-A modern, responsive React application built with Vite and Tailwind CSS. This project provides a comprehensive user interface for managing an offline compute grid, including device monitoring, task management, performance tracking, and user authentication.
+A modern, two-tiered Mobile Cloud Computing (MCC) platform that orchestrates location-aware task offloading across a local area network. This project provides a full-stack environment (React frontend + Node.js backend) to manage heterogeneous edge devices (PCs, laptops, smartphones) and distribute computationally intensive tasks offline, preserving battery life and avoiding expensive 3G/4G cloud connectivity.
 
 ## Features
 
-- **Authentication System**: Splash screen, Login, Account Creation, Password Recovery, and Email Verification.
-- **Dashboard**: High-level overview of the compute grid.
-- **Device Management**: View and manage connected devices in the grid.
-- **Task Manager**: Create, track, and manage computational tasks.
-- **File Manager**: Handle files associated with tasks and devices.
-- **Performance Monitoring**: Real-time performance metrics and charts (powered by Recharts).
-- **System Logs**: View detailed system logs.
-- **Notifications**: Stay updated with system alerts.
-- **User Settings & Profile**: Manage user preferences and profile information.
+- **Decentralized Task Orchestration**: Dynamically distribute tasks (Video Encoding, ML Training, etc.) to idle worker nodes within a local Wi-Fi cloudlet.
+- **Live Polling Backend**: An Express.js API that actively simulates task processing, progression, and edge node health checks.
+- **Interactive Dashboard**: A sleek, Violet-themed React SPA providing a real-time topology of connected devices and running tasks.
+- **Performance Monitoring**: Live telemetry charts (powered by Recharts) mapping CPU, RAM, and Network utilization.
+- **Authentication**: Simulated login flow and user session management.
+- **One-Click Startup**: Integrated Windows batch script to seamlessly launch both servers and the browser environment.
 
 ## Tech Stack
 
-- **Framework**: React 19
-- **Routing**: React Router DOM
-- **Styling**: Tailwind CSS v4
-- **Icons**: Lucide React
-- **Charts**: Recharts
-- **Build Tool**: Vite 8
-- **Language**: TypeScript
+- **Frontend**: React 19, TypeScript, Vite 8, Tailwind CSS v4, Recharts, Lucide React
+- **Backend**: Node.js, Express.js, TypeScript (ts-node)
+- **Architecture**: Edge-Assisted IoT Task Offloading (Local Cloudlet)
 
 ## Getting Started
 
-### Prerequisites
+### The Easy Way (Windows)
 
-Ensure you have Node.js and `pnpm` installed.
+The simplest way to run the entire application is to use the provided batch script:
 
-### Installation
+1. Double-click the `start.bat` file in the root directory.
+2. The script will automatically install dependencies, boot up the Node.js backend, start the React frontend, and open your browser to `http://localhost:8443`.
 
-1. Install dependencies:
-   ```bash
-   pnpm install
-   ```
+### Manual Start (Mac/Linux/Windows)
 
-2. Start the development server:
-   ```bash
-   pnpm run dev
-   ```
+If you prefer to start the servers manually via the terminal:
 
-3. Build for production:
-   ```bash
-   pnpm run build
-   ```
+**1. Start the Backend:**
+```bash
+cd backend
+npm install
+npm run dev
+```
+*(Runs on `http://localhost:3001`)*
 
-## Project Structure
+**2. Start the Frontend:**
+Open a new terminal window in the root directory:
+```bash
+npm install
+npm run dev
+```
+*(Runs on `http://localhost:8443` and proxies `/api` to the backend)*
 
-- `src/App.tsx` - Main routing and application structure
-- `src/pages/` - Contains all the page components (Dashboard, Devices, Tasks, etc.)
-- `src/components/` - Reusable UI components
-- `src/index.css` - Global styles and Tailwind imports
+## Academic Context
+
+This project serves as the practical implementation for a V Semester Project Review, strongly referencing concepts from state-of-the-art literature such as *"Online Algorithms for Location-Aware Task Offloading in Two-Tiered Mobile Cloud Environments"*. It demonstrates how localized, offline cloudlets can effectively mitigate the high latency and energy constraints typically associated with centralized cloud computing models.
+
+---
+*Developed for V Semester Project Review*
