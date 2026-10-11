@@ -20,190 +20,68 @@ export default function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) 
   };
 
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        background: "#F7F9FC",
-        display: "flex",
-        flexDirection: "column",
-        paddingTop: "env(safe-area-inset-top)",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          padding: "16px",
-          paddingTop: "20px",
-          position: "relative",
-        }}
-      >
+    <div className="min-h-screen bg-[#0B0C0E] text-[#FFFFFF] flex flex-col justify-center items-center px-4 py-8">
+      <div className="w-full max-w-md bg-[#14151B] border border-[#24262E] rounded-3xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <button
           onClick={onBack}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "6px",
-            borderRadius: "8px",
-            color: "#111827",
-            display: "flex",
-            alignItems: "center",
-          }}
+          className="flex items-center gap-1.5 text-xs font-semibold text-[#8E929E] hover:text-[#FFFFFF] mb-5 cursor-pointer"
         >
-          <ChevronLeft size={22} />
+          <ChevronLeft size={16} /> Back to Sign In
         </button>
-        <h1
-          style={{
-            position: "absolute",
-            left: "50%",
-            transform: "translateX(-50%)",
-            fontSize: "17px",
-            fontWeight: "600",
-            color: "#111827",
-            margin: 0,
-          }}
-        >
-          Reset Password
-        </h1>
-      </div>
 
-      {/* Content */}
-      <div className="animate-fade-in-up" style={{ padding: "0 24px", paddingTop: "32px" }}>
-        {/* Icon */}
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <div
-            style={{
-              width: "72px",
-              height: "72px",
-              background: "#F3E8FF",
-              borderRadius: "20px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Lock size={32} color="#8B5CF6" />
-          </div>
-        </div>
-
-        <h2
-          style={{
-            fontSize: "24px",
-            fontWeight: "700",
-            color: "#111827",
-            textAlign: "center",
-            marginTop: "16px",
-            marginBottom: "0",
-          }}
-        >
-          Reset your password
-        </h2>
-        <p
-          style={{
-            fontSize: "14px",
-            color: "#667085",
-            textAlign: "center",
-            marginTop: "8px",
-            marginBottom: "32px",
-            lineHeight: "1.5",
-          }}
-        >
-          Enter your email address and we&apos;ll send reset instructions.
-        </p>
-
-        {/* Email input */}
-        {!sent && (
-          <>
-            <label style={{ fontSize: "13px", fontWeight: "500", color: "#374151", display: "block", marginBottom: "6px" }}>
-              Email address
-            </label>
-            <div style={{ position: "relative", marginBottom: "24px" }}>
-              <Mail
-                size={16}
-                color="#98A2B3"
-                style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
-              />
-              <input
-                type="email"
-                className="input-field"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{ height: "44px", paddingLeft: "40px", paddingRight: "14px" }}
-              />
-            </div>
-
-            <button
-              className="btn-primary"
-              onClick={handleSend}
-              disabled={loading || !email}
-              style={{ width: "100%", height: "48px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
-            >
-              {loading ? (
-                <>
-                  <div
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      border: "2px solid rgba(255,255,255,0.4)",
-                      borderTop: "2px solid white",
-                      borderRadius: "50%",
-                      animation: "spin 0.8s linear infinite",
-                    }}
-                  />
-                  Sending…
-                </>
-              ) : (
-                "Send Reset Link"
-              )}
-            </button>
-          </>
-        )}
-
-        {/* Success state */}
-        {sent && (
-          <div
-            className="animate-fade-in-up"
-            style={{
-              background: "#ECFDF5",
-              border: "1px solid rgba(16,185,129,0.3)",
-              borderRadius: "12px",
-              padding: "16px",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "12px",
-            }}
-          >
-            <CheckCircle2 size={20} color="#10B981" style={{ flexShrink: 0, marginTop: "1px" }} />
-            <div>
-              <p style={{ fontSize: "14px", fontWeight: "600", color: "#10B981", margin: 0 }}>Check your email</p>
-              <p style={{ fontSize: "13px", color: "#059669", margin: 0, marginTop: "2px" }}>
-                Instructions sent to <strong>{email}</strong>
+        {!sent ? (
+          <div>
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-[rgba(255,122,0,0.15)] border border-[rgba(255,122,0,0.3)] mx-auto flex items-center justify-center text-[#FF7A00] mb-3 shadow-[0_0_16px_rgba(255,122,0,0.3)]">
+                <Lock size={22} />
+              </div>
+              <h1 className="text-xl font-bold text-white">Reset Password</h1>
+              <p className="text-xs text-[#8E929E] mt-1">
+                Enter your operator email to receive emergency key reset instructions.
               </p>
             </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-[11px] font-semibold text-[#8E929E] block mb-1">Registered Email</label>
+                <div className="relative">
+                  <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8E929E]" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="revanth.r.07.ac@gmail.com"
+                    className="w-full h-11 bg-[#0B0C0E] border border-[#282A32] rounded-xl pl-10 pr-3 text-xs text-white placeholder-[#667085] focus:outline-none focus:border-[#FF7A00]"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleSend}
+                disabled={loading || !email}
+                className="w-full h-11 rounded-xl bg-gradient-to-r from-[#FF7A00] to-[#FF5500] text-xs font-semibold text-white shadow-[0_2px_14px_rgba(255,122,0,0.4)] hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {loading ? "Generating Reset Token..." : "Send Reset Link"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-4 space-y-4">
+            <div className="w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 mx-auto flex items-center justify-center shadow-lg">
+              <CheckCircle2 size={32} />
+            </div>
+            <h2 className="text-lg font-bold text-white">Reset Link Dispatched</h2>
+            <p className="text-xs text-[#8E929E] leading-relaxed">
+              We have transmitted password reset token instructions to <span className="text-[#FF7A00] font-mono">{email}</span>.
+            </p>
+            <button
+              onClick={onBack}
+              className="mt-2 px-6 py-2.5 rounded-xl bg-[#18191E] border border-[#282A32] text-xs font-semibold text-white hover:border-[#FF7A00]"
+            >
+              Return to Login
+            </button>
           </div>
         )}
-
-        {/* Back to sign in */}
-        <div style={{ textAlign: "center", marginTop: "28px" }}>
-          <button
-            onClick={onBack}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "14px",
-              color: "#8B5CF6",
-              fontWeight: "500",
-              padding: 0,
-            }}
-          >
-            Back to Sign In
-          </button>
-        </div>
       </div>
     </div>
   );

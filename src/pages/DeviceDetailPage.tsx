@@ -11,8 +11,13 @@ import {
   PlusCircle,
   RotateCcw,
   PauseCircle,
+  PlayCircle,
   WifiOff,
   Zap,
+  Activity,
+  CheckCircle2,
+  AlertTriangle,
+  Server
 } from "lucide-react";
 import {
   AreaChart,
@@ -20,6 +25,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+import { useToast } from "../components/Toast";
 import type { DeviceType } from "./DevicesPage";
 
 interface DeviceDetailPageProps {
@@ -27,47 +33,140 @@ interface DeviceDetailPageProps {
   onBack: () => void;
 }
 
-function DeviceIcon({ type, size = 48 }: { type: DeviceType["type"]; size?: number }) {
-  const configs: Record<DeviceType["type"], { bg: string; color: string; Icon: React.ElementType }> = {
-    Laptop:  { bg: "#F3E8FF", color: "#8B5CF6", Icon: Laptop },
-    Mac:     { bg: "#F3E8FF", color: "#8B5CF6", Icon: Laptop },
-    PC:      { bg: "#F3F0FF", color: "#7C5CFC", Icon: Monitor },
-    Pi:      { bg: "#ECFDF5", color: "#10B981", Icon: CircuitBoard },
-    Android: { bg: "#FFF7ED", color: "#F59E0B", Icon: Smartphone },
+const DEVICES_DATA: Record<string, DeviceType> = {
+  d1: {
+    id: "d1",
+    name: "DESKTOP-A7X (Master Node)",
+    type: "PC",
+    role: "Master",
+    status: "busy",
+    cpu: 78,
+    ram: 65,
+    storage: 48,
+    net: "1.2 GB/s",
+    battery: null,
+    uptime: "14h 23m",
+    os: "Windows 11 Pro 64-bit",
+    ip: "192.168.1.101",
+    hostname: "desktop-a7x.local",
+    ping: 1,
+    task: "4K Video Transcoding — Episode 12",
+  },
+  d2: {
+    id: "d2",
+    name: "Mac-Studio M2 Max",
+    type: "Mac",
+    role: "Worker",
+    status: "busy",
+    cpu: 42,
+    ram: 58,
+    storage: 35,
+    net: "950 MB/s",
+    battery: null,
+    uptime: "3d 4h",
+    os: "macOS Sonoma 14.5",
+    ip: "192.168.1.108",
+    hostname: "mac-studio.local",
+    ping: 2,
+    task: "Metal Acceleration Worker",
+  },
+  d3: {
+    id: "d3",
+    name: "Worker-Rig-RTX",
+    type: "PC",
+    role: "Worker",
+    status: "busy",
+    cpu: 84,
+    ram: 76,
+    storage: 62,
+    net: "1.8 GB/s",
+    battery: null,
+    uptime: "1d 12h",
+    os: "Ubuntu 24.04 LTS (CUDA 12.4)",
+    ip: "192.168.1.110",
+    hostname: "worker-rig-rtx.local",
+    ping: 1,
+    task: "PyTorch DDP Mesh Worker",
+  },
+  d4: {
+    id: "d4",
+    name: "Laptop-Dev",
+    type: "Laptop",
+    role: "Worker",
+    status: "idle",
+    cpu: 12,
+    ram: 34,
+    storage: 22,
+    net: "420 MB/s",
+    battery: 88,
+    uptime: "6h 10m",
+    os: "Fedora 40 Workstation",
+    ip: "192.168.1.104",
+    hostname: "laptop-dev.local",
+    ping: 4,
+    task: null,
+  },
+  d5: {
+    id: "d5",
+    name: "RPi-4 Node A",
+    type: "Pi",
+    role: "Worker",
+    status: "online",
+    cpu: 24,
+    ram: 45,
+    storage: 15,
+    net: "120 MB/s",
+    battery: null,
+    uptime: "28d 14h",
+    os: "Debian Bookworm (ARM64)",
+    ip: "192.168.1.105",
+    hostname: "rpi4-node-a.local",
+    ping: 3,
+    task: null,
+  },
+};
+
+function DeviceIcon({ type }: { type: DeviceType["type"] }) {
+  const configs: Record<DeviceType["type"], { icon: React.ReactNode }> = {
+    Laptop:  { icon: <Laptop size={24} className="text-[#FF7A00]" /> },
+    Mac:     { icon: <Laptop size={24} className="text-[#FFA033]" /> },
+    PC:      { icon: <Monitor size={24} className="text-[#FF7A00]" /> },
+    Pi:      { icon: <CircuitBoard size={24} className="text-[#10B981]" /> },
+    Android: { icon: <Smartphone size={24} className="text-[#38BDF8]" /> },
   };
-  const { bg, color, Icon } = configs[type];
-  const pillSize = Math.round(size * 1.33);
-  const iconSize = size;
   return (
-    <div style={{ background: bg, borderRadius: pillSize * 0.28, width: pillSize, height: pillSize, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-      <Icon size={iconSize} color={color} />
+    <div className="w-12 h-12 rounded-xl bg-[rgba(255,122,0,0.12)] border border-[rgba(255,122,0,0.25)] flex items-center justify-center flex-shrink-0">
+      {configs[type]?.icon || <Server size={24} className="text-[#FF7A00]" />}
     </div>
   );
 }
 
 function StatusBadge({ status }: { status: DeviceType["status"] }) {
-  const configs: Record<DeviceType["status"], { bg: string; color: string; dot: string; pulse: boolean; label: string }> = {
-    online:  { bg: "#ECFDF5", color: "#10B981", dot: "●", pulse: true,  label: "Online" },
-    busy:    { bg: "#F3E8FF", color: "#8B5CF6", dot: "●", pulse: true,  label: "Busy" },
-    idle:    { bg: "#F1F4F9", color: "#667085", dot: "○", pulse: false, label: "Idle" },
-    offline: { bg: "#FEF2F2", color: "#EF4444", dot: "○", pulse: false, label: "Offline" },
+  const configs: Record<DeviceType["status"], { bg: string; border: string; color: string; label: string }> = {
+    online:  { bg: "rgba(16,185,129,0.15)", border: "rgba(16,185,129,0.3)", color: "#10B981", label: "Online" },
+    busy:    { bg: "rgba(255,122,0,0.15)",  border: "rgba(255,122,0,0.3)",  color: "#FF7A00", label: "Busy" },
+    idle:    { bg: "rgba(142,146,158,0.15)", border: "rgba(142,146,158,0.3)", color: "#8E929E", label: "Idle" },
+    offline: { bg: "rgba(239,68,68,0.15)",  border: "rgba(239,68,68,0.3)",  color: "#EF4444", label: "Offline" },
   };
-  const c = configs[status];
+  const c = configs[status] || configs.idle;
   return (
-    <span style={{ background: c.bg, color: c.color, borderRadius: 20, padding: "4px 10px", fontSize: 13, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 4 }}>
-      <span className={c.pulse ? "pulse-dot" : ""} style={{ fontSize: 9, lineHeight: 1 }}>{c.dot}</span>
+    <span
+      className="px-2.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1.5"
+      style={{ background: c.bg, border: `1px solid ${c.border}`, color: c.color }}
+    >
+      <span className="w-1.5 h-1.5 rounded-full bg-current" />
       {c.label}
     </span>
   );
 }
 
-function CircularProgress({ value, color, size = 56, strokeWidth = 6 }: { value: number; color: string; size?: number; strokeWidth?: number }) {
+function CircularProgress({ value, color, size = 56, strokeWidth = 5 }: { value: number; color: string; size?: number; strokeWidth?: number }) {
   const r = (size - strokeWidth) / 2;
   const circ = 2 * Math.PI * r;
   const dash = (Math.min(value, 100) / 100) * circ;
   return (
     <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#E6EAF0" strokeWidth={strokeWidth} />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#1F2128" strokeWidth={strokeWidth} />
       <circle
         cx={size / 2} cy={size / 2} r={r}
         fill="none"
@@ -82,225 +181,290 @@ function CircularProgress({ value, color, size = 56, strokeWidth = 6 }: { value:
 
 function MetricCard({ label, value, displayValue, color }: { label: string; value: number; displayValue: string; color: string }) {
   return (
-    <div className="card-sm" style={{ padding: 16, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-      <div style={{ position: "relative", width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className="bg-[#0B0C0E] border border-[#20222A] rounded-xl p-3 flex flex-col items-center gap-1">
+      <div className="relative w-14 h-14 flex items-center justify-center">
         <CircularProgress value={value} color={color} />
-        <span style={{ position: "absolute", fontSize: 11, fontWeight: 700, color: "#111827" }}>
-          {value > 0 ? `${value}` : "—"}
+        <span className="absolute text-xs font-mono font-bold text-[#FFFFFF]">
+          {value > 0 ? `${value}%` : "—"}
         </span>
       </div>
-      <div style={{ fontSize: 24, fontWeight: 700, color: "#111827", lineHeight: 1 }}>{displayValue}</div>
-      <div style={{ fontSize: 12, color: "#98A2B3" }}>{label}</div>
-    </div>
-  );
-}
-
-function generateChartData() {
-  const points: { t: number; v: number }[] = [];
-  let v = 40 + Math.random() * 30;
-  for (let i = 0; i < 30; i++) {
-    v = Math.max(5, Math.min(95, v + (Math.random() - 0.48) * 15));
-    points.push({ t: i, v: Math.round(v) });
-  }
-  return points;
-}
-
-function InfoRow({ label, value, mono = false, last = false }: { label: string; value: string; mono?: boolean; last?: boolean }) {
-  return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: last ? "none" : "1px solid #E6EAF0" }}>
-      <span style={{ fontSize: 13, color: "#667085" }}>{label}</span>
-      <span className={mono ? "mono" : ""} style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>{value}</span>
+      <div className="text-sm font-bold text-[#FFFFFF] mt-1">{displayValue}</div>
+      <div className="text-[11px] text-[#8E929E]">{label}</div>
     </div>
   );
 }
 
 export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageProps) {
-  const [device, setDevice] = React.useState<DeviceType | null>(null);
+  const { showToast } = useToast();
 
-  React.useEffect(() => {
-    const fetchDevice = () => {
-      fetch(`/api/devices/${deviceId}`)
-        .then(res => res.json())
-        .then(data => setDevice(data))
-        .catch(err => console.error("Failed to fetch device", err));
+  const [device, setDevice] = useState<DeviceType>(() => {
+    return DEVICES_DATA[deviceId] || {
+      ...DEVICES_DATA["d1"],
+      id: deviceId,
+      name: `Cluster Node (${deviceId})`,
     };
-    fetchDevice();
-    const interval = setInterval(fetchDevice, 3000);
-    return () => clearInterval(interval);
+  });
+
+  useEffect(() => {
+    fetch(`/api/devices/${deviceId}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.name) setDevice(data);
+      })
+      .catch(() => {
+        // Try getting from all devices list
+        fetch("/api/devices")
+          .then((r) => r.json())
+          .then((list) => {
+            if (Array.isArray(list)) {
+              const found = list.find((d: any) => d.id === deviceId || d.name.toLowerCase().includes(deviceId.toLowerCase()));
+              if (found) setDevice(found);
+            }
+          })
+          .catch(() => {});
+      });
   }, [deviceId]);
 
-  const [activeTab, setActiveTab] = React.useState("overview");
-  const chartData = useMemo(() => Array.from({ length: 24 }, (_, i) => ({ time: `${i}:00`, value: Math.round(20 + Math.random() * 60) })), []);
+  const [isRebooting, setIsRebooting] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
 
-  if (!device) {
-    return <div style={{ padding: 24 }}>Loading device details...</div>;
-  }
+  const chartData = useMemo(() => {
+    const points: { t: number; v: number }[] = [];
+    let v = device.cpu;
+    for (let i = 15; i >= 0; i--) {
+      v = Math.min(98, Math.max(10, v + (Math.random() - 0.48) * 12));
+      points.push({ t: i, v: Math.round(v) });
+    }
+    return points;
+  }, [device.cpu]);
 
-  const batteryDisplay = device.battery !== null ? `${device.battery}%` : "AC";
-  const batteryValue = device.battery !== null ? device.battery : 100;
+  const handleRestart = () => {
+    setIsRebooting(true);
+    showToast({ type: "warning", message: `Sent reboot signal to ${device.name}...` });
+    setTimeout(() => {
+      setIsRebooting(false);
+      showToast({ type: "success", message: `${device.name} restarted and re-joined mesh.` });
+    }, 2500);
+  };
+
+  const handleTogglePause = () => {
+    if (device.status === "busy") {
+      setDevice((d) => ({ ...d, status: "idle", task: null }));
+      showToast({ type: "info", message: `Worker tasks paused on ${device.name}.` });
+    } else {
+      setDevice((d) => ({ ...d, status: "busy", task: "Assigned: Transcode Chunk Batch 04" }));
+      showToast({ type: "success", message: `Workload scheduled on ${device.name}.` });
+    }
+  };
+
+  const handleDisconnect = () => {
+    setDevice((d) => ({ ...d, status: "offline", ping: null }));
+    showToast({ type: "error", message: `${device.name} disconnected from grid.` });
+  };
+
+  const handleAssignTask = (taskName: string) => {
+    setDevice((d) => ({ ...d, status: "busy", task: taskName }));
+    setShowAssignModal(false);
+    showToast({ type: "success", message: `Assigned "${taskName}" to ${device.name}.` });
+  };
 
   return (
-    <div style={{ background: "#F7F9FC", minHeight: "100vh", paddingBottom: 96 }}>
-      {/* Header */}
-      <div style={{ background: "#FFFFFF", borderBottom: "1px solid #E6EAF0", padding: "4px 4px", display: "flex", alignItems: "center" }}>
+    <div className="min-h-screen bg-[#0B0C0E] text-[#FFFFFF] pb-24">
+      {/* Top Navbar */}
+      <div className="sticky top-0 z-30 bg-[#111217]/95 backdrop-blur-md border-b border-[#24262E] px-4 py-3 flex items-center justify-between">
         <button
           onClick={onBack}
-          style={{ width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "none", cursor: "pointer", borderRadius: 10 }}
+          className="flex items-center gap-1.5 text-xs font-semibold text-[#8E929E] hover:text-[#FFFFFF] cursor-pointer"
         >
-          <ChevronLeft size={22} color="#111827" />
+          <ChevronLeft size={18} /> Back to Devices
         </button>
-        <span style={{ flex: 1, textAlign: "center", fontSize: 16, fontWeight: 600, color: "#111827" }}>{device.name}</span>
-        <button
-          style={{ width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "none", cursor: "pointer", borderRadius: 10 }}
-        >
-          <MoreVertical size={20} color="#667085" />
-        </button>
+        <StatusBadge status={isRebooting ? "idle" : device.status} />
       </div>
 
-      {/* Hero card */}
-      <div className="card animate-fade-in-up" style={{ margin: "16px 16px 0", padding: 20 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <DeviceIcon type={device.type} size={48} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <StatusBadge status={device.status} />
-              <span style={{ fontSize: 12, color: "#667085", border: "1px solid #E6EAF0", borderRadius: 20, padding: "2px 8px", fontWeight: 500 }}>{device.role}</span>
+      <div className="max-w-4xl mx-auto px-4 pt-5 space-y-4">
+        {/* Device Hero Card */}
+        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <DeviceIcon type={device.type} />
+              <div>
+                <h1 className="text-lg font-bold text-[#FFFFFF]">{device.name}</h1>
+                <p className="text-xs text-[#8E929E] mt-0.5 font-mono">{device.ip} • Uptime: {device.uptime}</p>
+              </div>
             </div>
-            <div className="mono" style={{ fontSize: 13, color: "#667085", marginTop: 8 }}>{device.ip}</div>
-            <div className="mono" style={{ fontSize: 12, color: "#98A2B3" }}>{device.hostname}</div>
-            {device.task && (
-              <span style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 4, background: "#F3E8FF", color: "#8B5CF6", borderRadius: 20, padding: "3px 9px", fontSize: 12, fontWeight: 500 }}>
-                <Zap size={11} />
-                {device.task}
-              </span>
-            )}
           </div>
-        </div>
-        <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 5, color: "#98A2B3", fontSize: 13 }}>
-          <Clock size={12} color="#98A2B3" />
-          Uptime: 14h 23m
-        </div>
-      </div>
 
-      {/* Metrics 2x2 grid */}
-      <div style={{ margin: "12px 16px 0", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        <MetricCard label="CPU Usage" value={device.cpu} displayValue={`${device.cpu}%`} color="#8B5CF6" />
-        <MetricCard label="RAM Usage" value={device.ram} displayValue={`${device.ram}%`} color="#7C5CFC" />
-        <MetricCard label="Storage" value={device.storage} displayValue={`${device.storage}%`} color="#10B981" />
-        {device.battery !== null ? (
-          <MetricCard label="Battery" value={batteryValue} displayValue={batteryDisplay} color="#F59E0B" />
-        ) : (
-          <MetricCard label="Temp" value={61} displayValue="61°C" color="#F59E0B" />
-        )}
-      </div>
-
-      {/* Performance chart */}
-      <div className="card animate-fade-in-up" style={{ margin: "12px 16px 0", padding: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>CPU Usage — Last 15 min</span>
-          <span style={{ fontSize: 11, fontWeight: 500, background: "#ECFDF5", color: "#10B981", borderRadius: 20, padding: "2px 8px" }}>Real-time</span>
-        </div>
-        <ResponsiveContainer width="100%" height={120}>
-          <AreaChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="cpuGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.18} />
-                <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.01} />
-              </linearGradient>
-            </defs>
-            <Tooltip
-              contentStyle={{ background: "#FFFFFF", border: "1px solid #E6EAF0", borderRadius: 8, fontSize: 12 }}
-              formatter={(v) => [`${v}%`, "CPU"]}
-              labelFormatter={() => ""}
+          {/* Metrics Circular Cards */}
+          <div className="grid grid-cols-3 gap-3 mt-5">
+            <MetricCard
+              label="CPU Load"
+              value={device.cpu}
+              displayValue={`${device.cpu}%`}
+              color="#FF7A00"
             />
-            <Area type="monotone" dataKey="v" stroke="#8B5CF6" strokeWidth={2} fill="url(#cpuGrad)" dot={false} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Task section */}
-      <div className="card animate-fade-in-up" style={{ margin: "12px 16px 0", padding: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: "#111827", marginBottom: 12 }}>Current Task</div>
-        {device.task ? (
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <Zap size={15} color="#8B5CF6" />
-              <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{device.task}</span>
-            </div>
-            <div style={{ marginBottom: 6 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#667085", marginBottom: 5 }}>
-                <span>Progress</span>
-                <span>67%</span>
-              </div>
-              <div style={{ background: "#F1F4F9", borderRadius: 4, height: 6 }}>
-                <div style={{ width: "67%", height: "100%", background: "#8B5CF6", borderRadius: 4 }} />
-              </div>
-            </div>
-            <div style={{ fontSize: 12, color: "#98A2B3", marginBottom: 12 }}>ETA: ~8 min remaining</div>
-            <button style={{ background: "#F3E8FF", color: "#8B5CF6", border: "none", borderRadius: 10, padding: "8px 16px", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
-              View Task
-            </button>
+            <MetricCard
+              label="RAM Mesh"
+              value={device.ram}
+              displayValue={`${device.ram}%`}
+              color="#FFA033"
+            />
+            <MetricCard
+              label="Ping Latency"
+              value={device.ping ? Math.min(100, device.ping * 10) : 0}
+              displayValue={device.ping !== null ? `${device.ping} ms` : "—"}
+              color="#10B981"
+            />
           </div>
-        ) : (
-          <div style={{ textAlign: "center", padding: "16px 0" }}>
-            <div style={{ fontSize: 13, color: "#98A2B3", marginBottom: 12 }}>No active task</div>
-            <button style={{ background: "#F3E8FF", color: "#8B5CF6", border: "none", borderRadius: 10, padding: "9px 18px", fontSize: 13, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <PlusCircle size={15} />
-              Assign Task
-            </button>
+        </div>
+
+        {/* Real-time CPU Usage Graph */}
+        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-bold text-[#FFFFFF] flex items-center gap-2">
+              <Activity size={16} className="text-[#FF7A00]" />
+              Telemetry Trend (Last 15 min)
+            </span>
+            <span className="text-[11px] text-emerald-400 font-mono bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+              Live Stream
+            </span>
           </div>
-        )}
+
+          <div className="h-32 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="cpuDetailGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#FF7A00" stopOpacity={0.35} />
+                    <stop offset="95%" stopColor="#FF7A00" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
+                <Tooltip
+                  contentStyle={{ background: "#18191E", border: "1px solid #282A32", borderRadius: 8, fontSize: 11, color: "#fff" }}
+                  formatter={(v) => [`${v}%`, "CPU Usage"]}
+                />
+                <Area type="monotone" dataKey="v" stroke="#FF7A00" strokeWidth={2} fill="url(#cpuDetailGrad)" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Active Task Card */}
+        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <h2 className="text-sm font-bold text-[#FFFFFF] mb-3">Workload Allocation</h2>
+          {device.task ? (
+            <div className="bg-[#0B0C0E] border border-[#20222A] rounded-xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#FFFFFF] flex items-center gap-2">
+                  <Zap size={14} className="text-[#FF7A00]" />
+                  {device.task}
+                </span>
+                <span className="text-xs text-[#FF7A00] font-mono">Running (67%)</span>
+              </div>
+              <div className="h-2 w-full bg-[#1F2128] rounded-full overflow-hidden">
+                <div className="h-full rounded-full bg-gradient-to-r from-[#FF7A00] to-[#FF5500]" style={{ width: "67%" }} />
+              </div>
+              <div className="flex justify-between items-center text-[11px] text-[#8E929E]">
+                <span>Throughput: {device.net}</span>
+                <button
+                  onClick={() => handleTogglePause()}
+                  className="text-xs text-[#FF7A00] hover:underline"
+                >
+                  Pause Chunk
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-[#0B0C0E] border border-[#20222A] rounded-xl p-6 text-center">
+              <p className="text-xs text-[#8E929E] mb-3">No active compute task currently assigned to this node.</p>
+              <button
+                onClick={() => setShowAssignModal(true)}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF7A00] to-[#FF5500] text-xs font-semibold text-white shadow-md hover:brightness-110 flex items-center gap-1.5 mx-auto cursor-pointer"
+              >
+                <PlusCircle size={14} /> Assign Queued Task
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Node Specs & Network Info */}
+        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)] space-y-3 text-xs">
+          <h2 className="text-sm font-bold text-[#FFFFFF] mb-2">Node Specifications</h2>
+          <div className="flex justify-between py-1.5 border-b border-[#20222A]">
+            <span className="text-[#8E929E]">Operating System</span>
+            <span className="font-semibold text-white">{device.os}</span>
+          </div>
+          <div className="flex justify-between py-1.5 border-b border-[#20222A]">
+            <span className="text-[#8E929E]">P2P Link Throughput</span>
+            <span className="font-semibold text-[#FF7A00]">{device.net}</span>
+          </div>
+          <div className="flex justify-between py-1.5 border-b border-[#20222A]">
+            <span className="text-[#8E929E]">Cluster IP</span>
+            <span className="font-mono text-white">{device.ip}</span>
+          </div>
+          <div className="flex justify-between py-1.5">
+            <span className="text-[#8E929E]">Hostname</span>
+            <span className="font-mono text-white">{device.hostname}</span>
+          </div>
+        </div>
+
+        {/* Control Action Buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <button
+            onClick={handleRestart}
+            disabled={isRebooting}
+            className="h-11 rounded-xl bg-[#18191E] border border-[#282A32] text-xs font-semibold text-white hover:border-[#FF7A00] flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            <RotateCcw size={15} className={isRebooting ? "animate-spin text-[#FF7A00]" : ""} />
+            {isRebooting ? "Rebooting..." : "Restart Node"}
+          </button>
+          <button
+            onClick={handleTogglePause}
+            className="h-11 rounded-xl bg-[#18191E] border border-[#282A32] text-xs font-semibold text-[#FF7A00] hover:bg-[#20222A] flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            {device.status === "busy" ? <PauseCircle size={15} /> : <PlayCircle size={15} />}
+            {device.status === "busy" ? "Pause Worker" : "Resume Worker"}
+          </button>
+          <button
+            onClick={handleDisconnect}
+            className="h-11 rounded-xl bg-red-500/15 border border-red-500/30 text-xs font-semibold text-red-400 hover:bg-red-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            <WifiOff size={15} />
+            Disconnect Node
+          </button>
+        </div>
       </div>
 
-      {/* Device info */}
-      <div className="card animate-fade-in-up" style={{ margin: "12px 16px 0", padding: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Device Info</div>
-        <InfoRow label="Operating System" value={device.os} />
-        <InfoRow label="Network Speed" value={device.net} />
-        <InfoRow label="Ping" value={device.ping !== null ? `${device.ping}ms` : "—"} />
-        <InfoRow label="Last Heartbeat" value="just now" />
-        <InfoRow label="IP Address" value={device.ip} mono last={false} />
-        <InfoRow label="Hostname" value={device.hostname} mono last />
-      </div>
-
-      {/* Action buttons */}
-      <div style={{ margin: "16px 16px 0", display: "flex", flexDirection: "column", gap: 12 }}>
-        <button className="btn-secondary" style={{ width: "100%", height: 48, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-          <RotateCcw size={16} />
-          Restart Device
-        </button>
-        <button className="btn-secondary" style={{ width: "100%", height: 48, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-          <PauseCircle size={16} />
-          Pause Worker
-        </button>
-        <button
-          style={{
-            width: "100%",
-            height: 48,
-            background: "#FEF2F2",
-            border: "1px solid rgba(239,68,68,0.1)",
-            borderRadius: 12,
-            color: "#EF4444",
-            fontSize: 15,
-            fontWeight: 500,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            fontFamily: "inherit",
-          }}
+      {/* Assign Task Modal */}
+      {showAssignModal && (
+        <div
+          onClick={() => setShowAssignModal(false)}
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
         >
-          <WifiOff size={16} />
-          Disconnect
-        </button>
-      </div>
-
-      {/* AC power note when no battery */}
-      {device.battery === null && (
-        <div style={{ margin: "12px 16px 0", display: "flex", alignItems: "center", gap: 6, color: "#98A2B3", fontSize: 12 }}>
-          <Plug size={12} />
-          Running on AC power — no battery data available
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-[#14151B] border border-[#282A32] rounded-2xl p-5 shadow-2xl space-y-4"
+          >
+            <h3 className="text-sm font-bold text-white">Assign Task to {device.name}</h3>
+            <div className="space-y-2">
+              {["3D Blender Render — Frame 01-250", "Dataset SHA256 Verification", "Genomic Sequence Alignment"].map((t) => (
+                <button
+                  key={t}
+                  onClick={() => handleAssignTask(t)}
+                  className="w-full text-left p-3 rounded-xl bg-[#0B0C0E] border border-[#20222A] hover:border-[#FF7A00] text-xs font-semibold text-white transition-all cursor-pointer"
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setShowAssignModal(false)}
+                className="px-4 py-2 rounded-xl bg-[#18191E] border border-[#282A32] text-xs text-[#8E929E] hover:text-white"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,6 +1,23 @@
 import express from 'express';
 import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
 import { devices, tasks, DeviceType, Task } from './data';
+
+// Load local .env configuration
+try {
+  const envPath = path.resolve(__dirname, '.env');
+  if (fs.existsSync(envPath)) {
+    const lines = fs.readFileSync(envPath, 'utf-8').split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#')) {
+        const [k, ...v] = trimmed.split('=');
+        if (k && v.length) process.env[k.trim()] = v.join('=').trim();
+      }
+    }
+  }
+} catch {}
 
 const app = express();
 const port = 3001;
@@ -93,6 +110,49 @@ app.post('/api/auth/login', (req, res) => {
     res.json({ token: 'fake-jwt-token-123', user: { email } });
   } else {
     res.status(400).json({ message: 'Email and password required' });
+  }
+});
+
+// Gemini AI API Endpoints
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-lite-latest';
+
+// GET /api/gemini/status
+app.get('/api/gemini/status', (req, res) => {
+  res.json({
+    active: Boolean(GEMINI_API_KEY),
+    model: GEMINI_MODEL,
+    keyPreview: GEMINI_API_KEY ? `${GEMINI_API_KEY.slice(0, 6)}...${GEMINI_API_KEY.slice(-4)}` : null,
+  });
+});
+
+// POST /api/gemini/prompt
+app.post('/api/gemini/prompt', async (req, res) => {
+  const { prompt, model = GEMINI_MODEL } = req.body;
+  if (!prompt) {
+    return res.status(400).json({ message: 'Prompt is required' });
+  }
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return res.status(response.status).json(errorData);
+    }
+
+    const data = await response.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    res.json({ reply, model });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message || 'Gemini proxy error' });
   }
 });
 

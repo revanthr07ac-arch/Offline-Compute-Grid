@@ -10,9 +10,21 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import {
+  Activity,
+  Download,
+  Play,
+  Pause,
+  RefreshCw,
+  Cpu,
+  HardDrive,
+  Wifi,
+  Server
+} from "lucide-react";
+import { useToast } from "../components/Toast";
 
 const TIMELINE_OPTIONS = ["1m", "5m", "15m", "1h", "24h"];
-const NODE_NAMES = ["Laptop-1", "PC-2", "RPi-3", "Mac-5", "Pi-4", "Mini-6"];
+const NODE_NAMES = ["DESKTOP-A7X (Master)", "Mac-Studio", "Worker-Rig-RTX", "Laptop-Dev", "RPi-4 Node A", "RPi-4 Node B"];
 
 function rand(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -20,383 +32,308 @@ function rand(min: number, max: number) {
 
 function generatePoint(t: number) {
   return {
-    t,
-    cpu1: rand(55, 85),
-    cpu2: rand(40, 70),
-    cpu3: rand(60, 90),
-    cpu4: rand(30, 60),
-    memUsed: rand(60, 80),
-    memAvail: rand(20, 40),
-    netDown: rand(100, 200),
-    netUp: rand(20, 60),
+    t: `${t * 2}s`,
+    cpu1: rand(65, 88),
+    cpu2: rand(40, 72),
+    cpu3: rand(60, 92),
+    cpu4: rand(30, 55),
+    memUsed: rand(65, 84),
+    memAvail: rand(16, 35),
+    netDown: rand(120, 240),
+    netUp: rand(40, 90),
   };
 }
 
-function initData() {
-  return Array.from({ length: 20 }, (_, i) => generatePoint(i));
-}
-
-function generateHeatmapRow() {
-  return Array.from({ length: 20 }, () => rand(5, 100));
-}
-
-const HEATMAP_DATA = NODE_NAMES.map((name) => ({
-  name,
-  values: generateHeatmapRow(),
-}));
-
-const NODE_TABLE = [
-  { node: "Laptop-1", cpu: 67, ram: 71, disk: 54, temp: 61, tasks: 3, status: "Active" },
-  { node: "PC-2", cpu: 45, ram: 58, disk: 32, temp: 55, tasks: 5, status: "Active" },
-  { node: "RPi-3", cpu: 82, ram: 88, disk: 71, temp: 74, tasks: 2, status: "Busy" },
-  { node: "Mac-5", cpu: 38, ram: 49, disk: 28, temp: 52, tasks: 4, status: "Active" },
-  { node: "Pi-4", cpu: 91, ram: 94, disk: 85, temp: 79, tasks: 1, status: "Critical" },
-  { node: "Mini-6", cpu: 22, ram: 33, disk: 18, temp: 44, tasks: 0, status: "Idle" },
+const INITIAL_NODES = [
+  { node: "DESKTOP-A7X (Master)", cpu: 78, ram: 65, disk: 54, temp: 62, tasks: 5, status: "Active" },
+  { node: "Mac-Studio", cpu: 42, ram: 58, disk: 32, temp: 50, tasks: 4, status: "Active" },
+  { node: "Worker-Rig-RTX", cpu: 84, ram: 76, disk: 71, temp: 72, tasks: 3, status: "Busy" },
+  { node: "Laptop-Dev", cpu: 28, ram: 44, disk: 28, temp: 48, tasks: 1, status: "Active" },
+  { node: "RPi-4 Node A", cpu: 89, ram: 82, disk: 85, temp: 68, tasks: 2, status: "High Load" },
+  { node: "RPi-4 Node B", cpu: 18, ram: 25, disk: 18, temp: 42, tasks: 0, status: "Idle" },
 ];
 
-function MiniSparkline({ color, dashed }: { color: string; dashed?: boolean }) {
-  const data = Array.from({ length: 10 }, (_, i) => ({ v: rand(20, 90), i }));
-  return (
-    <ResponsiveContainer width="100%" height={40}>
-      <LineChart data={data} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
-        <Line
-          type="monotone"
-          dataKey="v"
-          stroke={color}
-          strokeWidth={1.5}
-          dot={false}
-          strokeDasharray={dashed ? "4 2" : undefined}
-          isAnimationActive={false}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  );
-}
-
-function MiniBar({ value, color }: { value: number; color: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-      <div
-        style={{
-          flex: 1,
-          height: 4,
-          background: "#F1F4F9",
-          borderRadius: 2,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            width: `${value}%`,
-            height: "100%",
-            background: color,
-            borderRadius: 2,
-          }}
-        />
-      </div>
-      <span style={{ fontSize: 10, color: "#98A2B3", width: 24, textAlign: "right" }}>
-        {value}%
-      </span>
-    </div>
-  );
-}
-
-function statusColor(s: string) {
-  if (s === "Active") return "#10B981";
-  if (s === "Busy") return "#F59E0B";
-  if (s === "Critical") return "#EF4444";
-  return "#98A2B3";
-}
-
 export default function PerformancePage() {
-  const [timeline, setTimeline] = useState("5m");
-  const [chartData, setChartData] = useState(initData);
+  const { showToast } = useToast();
+  const [selectedTimeline, setSelectedTimeline] = useState("15m");
+  const [isLive, setIsLive] = useState(true);
+  const [chartData, setChartData] = useState(() =>
+    Array.from({ length: 15 }, (_, i) => generatePoint(i))
+  );
+
+  const [heatmapData, setHeatmapData] = useState(() =>
+    NODE_NAMES.map((name) => ({
+      name,
+      values: Array.from({ length: 18 }, () => rand(10, 98)),
+    }))
+  );
 
   useEffect(() => {
-    const id = setInterval(() => {
+    if (!isLive) return;
+    const interval = setInterval(() => {
       setChartData((prev) => {
-        const next = [...prev.slice(1), generatePoint(prev[prev.length - 1].t + 1)];
-        return next;
+        const nextTime = prev.length;
+        const newPoint = generatePoint(nextTime);
+        return [...prev.slice(1), newPoint];
       });
     }, 2000);
-    return () => clearInterval(id);
-  }, []);
+    return () => clearInterval(interval);
+  }, [isLive]);
 
-  const RESOURCE_CARDS = [
-    { label: "CPU Avg", value: "67%", color: "#8B5CF6" },
-    { label: "Memory", value: "71%", color: "#7C5CFC" },
-    { label: "Net In", value: "142 MB/s", color: "#10B981" },
-    { label: "Net Out", value: "38 MB/s", color: "#10B981", dashed: true },
-    { label: "Disk I/O", value: "54 MB/s", color: "#F59E0B" },
-    { label: "Temp", value: "61°C", color: "#EF4444" },
-  ];
+  const handleExportCSV = () => {
+    const headers = "timestamp,cpu_master,cpu_mac,cpu_rtx,mem_used,net_down_mbps\n";
+    const rows = chartData.map((d) => `${d.t},${d.cpu1},${d.cpu2},${d.cpu3},${d.memUsed},${d.netDown}`).join("\n");
+    const blob = new Blob([headers + rows], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cluster_telemetry_${selectedTimeline}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast({ type: "success", message: "Cluster telemetry CSV exported." });
+  };
+
+  const statusBadgeColor = (status: string) => {
+    switch (status) {
+      case "Active":
+        return { bg: "rgba(16,185,129,0.15)", border: "rgba(16,185,129,0.3)", text: "#10B981" };
+      case "Busy":
+        return { bg: "rgba(255,122,0,0.15)", border: "rgba(255,122,0,0.3)", text: "#FF7A00" };
+      case "High Load":
+        return { bg: "rgba(239,68,68,0.15)", border: "rgba(239,68,68,0.3)", text: "#EF4444" };
+      default:
+        return { bg: "rgba(142,146,158,0.15)", border: "rgba(142,146,158,0.3)", text: "#8E929E" };
+    }
+  };
 
   return (
-    <div style={{ background: "#F7F9FC", minHeight: "100vh" }}>
-      {/* Header */}
-      <div
-        style={{
-          background: "#FFFFFF",
-          borderBottom: "1px solid #E6EAF0",
-          padding: "12px 16px 0",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-          <span style={{ fontSize: 18, fontWeight: 600, color: "#111827" }}>Performance</span>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span
-              className="pulse-dot"
-              style={{
-                display: "inline-block",
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: "#10B981",
-              }}
-            />
-            <span style={{ fontSize: 12, color: "#10B981", fontWeight: 500 }}>Live · 2s</span>
-          </div>
+    <div className="min-h-screen bg-[#0B0C0E] text-[#FFFFFF] pb-24">
+      {/* Sticky Topbar */}
+      <div className="sticky top-0 z-30 bg-[#111217]/95 backdrop-blur-md border-b border-[#24262E] px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Activity size={18} className="text-[#FF7A00]" />
+          <h1 className="text-base font-bold text-[#FFFFFF]">Cluster Telemetry</h1>
         </div>
-        {/* Timeline pills */}
-        <div style={{ display: "flex", gap: 6, overflowX: "auto", scrollbarWidth: "none", paddingBottom: 12 }}>
-          {TIMELINE_OPTIONS.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTimeline(t)}
-              style={{
-                flexShrink: 0,
-                padding: "5px 14px",
-                borderRadius: 20,
-                border: "none",
-                background: timeline === t ? "#8B5CF6" : "#F1F4F9",
-                color: timeline === t ? "#FFFFFF" : "#667085",
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
-            >
-              {t}
-            </button>
-          ))}
+
+        <div className="flex items-center gap-2">
+          {/* Timeline Pills */}
+          <div className="flex items-center bg-[#18191E] border border-[#282A32] rounded-xl p-0.5">
+            {TIMELINE_OPTIONS.map((t) => (
+              <button
+                key={t}
+                onClick={() => setSelectedTimeline(t)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  selectedTimeline === t
+                    ? "bg-[#FF7A00] text-black shadow-sm"
+                    : "text-[#8E929E] hover:text-[#FFFFFF]"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          {/* Live / Pause Button */}
+          <button
+            onClick={() => {
+              setIsLive(!isLive);
+              showToast({
+                type: isLive ? "warning" : "success",
+                message: isLive ? "Telemetry stream paused." : "Live telemetry resumed.",
+              });
+            }}
+            className={`p-2 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+              isLive
+                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
+                : "bg-[#18191E] border-[#282A32] text-[#8E929E]"
+            }`}
+            title={isLive ? "Pause stream" : "Resume stream"}
+          >
+            {isLive ? <Pause size={14} /> : <Play size={14} />}
+          </button>
+
+          {/* Export Button */}
+          <button
+            onClick={handleExportCSV}
+            className="px-3 py-1.5 rounded-xl bg-[#18191E] border border-[#282A32] text-xs font-semibold text-[#FF7A00] hover:bg-[#20222A] flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <Download size={14} /> Export CSV
+          </button>
         </div>
       </div>
 
-      {/* Resource cards 2×3 */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 12,
-          padding: "12px 16px 0",
-        }}
-      >
-        {RESOURCE_CARDS.map((rc) => (
-          <div key={rc.label} className="card-sm" style={{ padding: 12 }}>
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 600,
-                color: "#98A2B3",
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                marginBottom: 2,
-              }}
-            >
-              {rc.label}
+      <div className="max-w-6xl mx-auto px-4 pt-5 space-y-4">
+        {/* Top 4 Real-time Metric Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-4">
+            <span className="text-[11px] font-semibold uppercase text-[#8E929E] flex items-center gap-1.5">
+              <Cpu size={14} className="text-[#FF7A00]" /> Compute Load
+            </span>
+            <div className="text-2xl font-bold text-[#FFFFFF] mt-1">84%</div>
+            <span className="text-[11px] text-[#FF7A00] font-mono">Peak: 94% • 48 Cores</span>
+          </div>
+          <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-4">
+            <span className="text-[11px] font-semibold uppercase text-[#8E929E] flex items-center gap-1.5">
+              <Server size={14} className="text-[#FFA033]" /> Memory Mesh
+            </span>
+            <div className="text-2xl font-bold text-[#FFFFFF] mt-1">76%</div>
+            <span className="text-[11px] text-[#FFA033] font-mono">124 GB / 192 GB</span>
+          </div>
+          <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-4">
+            <span className="text-[11px] font-semibold uppercase text-[#8E929E] flex items-center gap-1.5">
+              <Wifi size={14} className="text-emerald-400" /> P2P Mesh Traffic
+            </span>
+            <div className="text-2xl font-bold text-[#FFFFFF] mt-1">90 MB/s</div>
+            <span className="text-[11px] text-emerald-400 font-mono">Direct Socket Link</span>
+          </div>
+          <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-4">
+            <span className="text-[11px] font-semibold uppercase text-[#8E929E] flex items-center gap-1.5">
+              <HardDrive size={14} className="text-[#38BDF8]" /> Disk Throughput
+            </span>
+            <div className="text-2xl font-bold text-[#FFFFFF] mt-1">55 MB/s</div>
+            <span className="text-[11px] text-[#38BDF8] font-mono">NVMe Shared Cache</span>
+          </div>
+        </div>
+
+        {/* Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Multi-Node CPU Load Chart */}
+          <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+            <h2 className="text-sm font-bold text-[#FFFFFF] mb-3 flex items-center justify-between">
+              <span>Cluster CPU Load by Node</span>
+              <span className="text-xs font-mono text-[#8E929E]">{selectedTimeline} range</span>
+            </h2>
+            <div className="h-56 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="cOrange" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#FF7A00" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#FF7A00" stopOpacity={0.0} />
+                    </linearGradient>
+                    <linearGradient id="cAmber" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#FFA033" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#FFA033" stopOpacity={0.0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="t" stroke="#8E929E" fontSize={10} tickLine={false} />
+                  <YAxis stroke="#8E929E" fontSize={10} domain={[0, 100]} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ background: "#18191E", border: "1px solid #282A32", borderRadius: 8, fontSize: 11, color: "#fff" }}
+                  />
+                  <Area type="monotone" dataKey="cpu1" name="Master Node" stroke="#FF7A00" strokeWidth={2} fill="url(#cOrange)" />
+                  <Area type="monotone" dataKey="cpu3" name="RTX Worker" stroke="#FFA033" strokeWidth={1.5} fill="url(#cAmber)" />
+                  <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: "#111827", lineHeight: 1.2 }}>
-              {rc.value}
+          </div>
+
+          {/* Network Throughput Chart */}
+          <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+            <h2 className="text-sm font-bold text-[#FFFFFF] mb-3 flex items-center justify-between">
+              <span>P2P Grid Network Bandwidth (MB/s)</span>
+              <span className="text-xs font-mono text-emerald-400">Low Latency</span>
+            </h2>
+            <div className="h-56 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <XAxis dataKey="t" stroke="#8E929E" fontSize={10} tickLine={false} />
+                  <YAxis stroke="#8E929E" fontSize={10} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ background: "#18191E", border: "1px solid #282A32", borderRadius: 8, fontSize: 11, color: "#fff" }}
+                  />
+                  <Line type="monotone" dataKey="netDown" name="P2P Inbound" stroke="#10B981" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="netUp" name="P2P Outbound" stroke="#FF7A00" strokeWidth={2} dot={false} />
+                  <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
-            <MiniSparkline color={rc.color} dashed={(rc as any).dashed} />
           </div>
-        ))}
-      </div>
-
-      {/* Charts */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "12px 16px 0" }}>
-        {/* CPU Usage */}
-        <div className="card" style={{ padding: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 8 }}>
-            CPU Usage
-          </div>
-          <ResponsiveContainer width="100%" height={140}>
-            <AreaChart data={chartData} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
-              <XAxis dataKey="t" tick={{ fontSize: 10, fill: "#98A2B3" }} tickLine={false} axisLine={false} />
-              <Tooltip
-                contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid #E6EAF0" }}
-                labelFormatter={() => ""}
-              />
-              <Area type="monotone" dataKey="cpu1" name="Laptop-1" stroke="#8B5CF6" fill="#8B5CF620" strokeWidth={1.5} dot={false} />
-              <Area type="monotone" dataKey="cpu2" name="PC-2" stroke="#7C5CFC" fill="#7C5CFC20" strokeWidth={1.5} dot={false} />
-              <Area type="monotone" dataKey="cpu3" name="RPi-3" stroke="#10B981" fill="#10B98120" strokeWidth={1.5} dot={false} />
-              <Area type="monotone" dataKey="cpu4" name="Mac-5" stroke="#F59E0B" fill="#F59E0B20" strokeWidth={1.5} dot={false} />
-              <Legend
-                wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
-                iconType="circle"
-                iconSize={6}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
         </div>
 
-        {/* Memory */}
-        <div className="card" style={{ padding: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 8 }}>
-            Memory
+        {/* Node Comparison Table */}
+        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-[#FFFFFF]">Node Telemetry Matrix</h2>
+            <span className="text-xs text-[#8E929E]">6 connected workers</span>
           </div>
-          <ResponsiveContainer width="100%" height={140}>
-            <AreaChart data={chartData} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
-              <XAxis dataKey="t" tick={{ fontSize: 10, fill: "#98A2B3" }} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid #E6EAF0" }} labelFormatter={() => ""} />
-              <Area type="monotone" dataKey="memUsed" name="Used" stroke="#7C5CFC" fill="#7C5CFC20" strokeWidth={1.5} dot={false} />
-              <Area type="monotone" dataKey="memAvail" name="Available" stroke="#10B981" fill="#10B98120" strokeWidth={1.5} dot={false} />
-              <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} iconType="circle" iconSize={6} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
 
-        {/* Network */}
-        <div className="card" style={{ padding: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 8 }}>
-            Network (MB/s)
-          </div>
-          <ResponsiveContainer width="100%" height={120}>
-            <LineChart data={chartData} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
-              <XAxis dataKey="t" tick={{ fontSize: 10, fill: "#98A2B3" }} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid #E6EAF0" }} labelFormatter={() => ""} />
-              <Line type="monotone" dataKey="netDown" name="Download" stroke="#10B981" strokeWidth={1.5} dot={false} />
-              <Line type="monotone" dataKey="netUp" name="Upload" stroke="#8B5CF6" strokeWidth={1.5} dot={false} />
-              <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} iconType="circle" iconSize={6} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Node comparison table */}
-        <div className="card" style={{ padding: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 12 }}>
-            Node Comparison
-          </div>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
               <thead>
-                <tr>
-                  {["Node", "CPU", "RAM", "Disk", "Temp", "Tasks", "Status"].map((h) => (
-                    <th
-                      key={h}
-                      style={{
-                        textAlign: "left",
-                        padding: "4px 8px",
-                        color: "#98A2B3",
-                        fontWeight: 600,
-                        fontSize: 10,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.04em",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
+                <tr className="border-b border-[#24262E] text-[10px] text-[#8E929E] uppercase tracking-wider">
+                  <th className="pb-2.5 font-semibold">Node Name</th>
+                  <th className="pb-2.5 font-semibold">CPU</th>
+                  <th className="pb-2.5 font-semibold">RAM</th>
+                  <th className="pb-2.5 font-semibold">Disk Cache</th>
+                  <th className="pb-2.5 font-semibold">Core Temp</th>
+                  <th className="pb-2.5 font-semibold">Active Tasks</th>
+                  <th className="pb-2.5 font-semibold">Status</th>
                 </tr>
               </thead>
-              <tbody>
-                {NODE_TABLE.map((row, i) => (
-                  <tr
-                    key={row.node}
-                    style={{ background: i % 2 === 0 ? "#F7F9FC" : "#FFFFFF" }}
-                  >
-                    <td style={{ padding: "6px 8px", fontWeight: 600, color: "#111827", whiteSpace: "nowrap" }}>
-                      {row.node}
-                    </td>
-                    <td style={{ padding: "6px 8px", minWidth: 70 }}>
-                      <MiniBar value={row.cpu} color="#8B5CF6" />
-                    </td>
-                    <td style={{ padding: "6px 8px", minWidth: 70 }}>
-                      <MiniBar value={row.ram} color="#7C5CFC" />
-                    </td>
-                    <td style={{ padding: "6px 8px", minWidth: 70 }}>
-                      <MiniBar value={row.disk} color="#F59E0B" />
-                    </td>
-                    <td style={{ padding: "6px 8px", color: "#EF4444", fontWeight: 600 }}>
-                      {row.temp}&deg;
-                    </td>
-                    <td style={{ padding: "6px 8px", color: "#111827", textAlign: "center" }}>
-                      {row.tasks}
-                    </td>
-                    <td style={{ padding: "6px 8px" }}>
-                      <span
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 600,
-                          color: statusColor(row.status),
-                          background: `${statusColor(row.status)}18`,
-                          borderRadius: 6,
-                          padding: "2px 6px",
-                        }}
-                      >
-                        {row.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+              <tbody className="divide-y divide-[#20222A]">
+                {INITIAL_NODES.map((row) => {
+                  const badge = statusBadgeColor(row.status);
+                  return (
+                    <tr key={row.node} className="hover:bg-[#18191E] transition-colors">
+                      <td className="py-3 font-semibold text-white whitespace-nowrap">{row.node}</td>
+                      <td className="py-3 font-mono text-[#FF7A00]">{row.cpu}%</td>
+                      <td className="py-3 font-mono text-[#FFA033]">{row.ram}%</td>
+                      <td className="py-3 font-mono text-[#38BDF8]">{row.disk}%</td>
+                      <td className="py-3 font-mono text-[#EF4444]">{row.temp}°C</td>
+                      <td className="py-3 font-mono text-white">{row.tasks}</td>
+                      <td className="py-3">
+                        <span
+                          className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                          style={{ background: badge.bg, border: `1px solid ${badge.border}`, color: badge.text }}
+                        >
+                          {row.status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
-      </div>
 
-      {/* Heatmap */}
-      <div className="card" style={{ margin: "12px 16px 96px", padding: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>CPU Heatmap</div>
-        <div style={{ fontSize: 11, color: "#98A2B3", marginBottom: 12 }}>Last 30 min</div>
-        <div style={{ overflowX: "auto" }}>
-          {HEATMAP_DATA.map((row) => (
-            <div
-              key={row.name}
-              style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 4 }}
-            >
-              <div
-                style={{
-                  width: 60,
-                  fontSize: 10,
-                  color: "#98A2B3",
-                  flexShrink: 0,
-                  textAlign: "right",
-                  paddingRight: 6,
-                }}
-              >
-                {row.name}
-              </div>
-              <div style={{ display: "flex", gap: 2 }}>
-                {row.values.map((v, j) => (
-                  <div
-                    key={j}
-                    style={{
-                      width: 14,
-                      height: 14,
-                      borderRadius: 2,
-                      background: `rgba(79,111,255,${Math.max(0.05, v / 100)})`,
-                      flexShrink: 0,
-                    }}
-                    title={`${v}%`}
-                  />
-                ))}
-              </div>
+        {/* CPU Heatmap */}
+        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-[#FFFFFF]">Spatial Grid Heatmap (30-sec buckets)</h2>
+            <div className="flex items-center gap-2 text-[10px] text-[#8E929E]">
+              <span>Idle</span>
+              <div className="w-16 h-2 rounded-full bg-gradient-to-r from-[rgba(255,122,0,0.1)] to-[#FF7A00]" />
+              <span>Saturated</span>
             </div>
-          ))}
-        </div>
-        {/* Legend */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
-          <span style={{ fontSize: 10, color: "#98A2B3" }}>Low</span>
-          <div
-            style={{
-              flex: 1,
-              height: 8,
-              borderRadius: 4,
-              background: "linear-gradient(90deg, rgba(79,111,255,0.05), rgba(79,111,255,1))",
-            }}
-          />
-          <span style={{ fontSize: 10, color: "#98A2B3" }}>High</span>
+          </div>
+
+          <div className="space-y-2">
+            {heatmapData.map((row) => (
+              <div key={row.name} className="flex items-center gap-3">
+                <span className="w-36 text-xs text-[#8E929E] truncate text-right flex-shrink-0">
+                  {row.name}
+                </span>
+                <div className="flex items-center gap-1.5 flex-1 overflow-x-auto py-1">
+                  {row.values.map((v, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        background: `rgba(255, 122, 0, ${Math.max(0.12, v / 100)})`,
+                      }}
+                      className="w-4 h-4 rounded-md border border-[rgba(255,122,0,0.2)] hover:scale-125 transition-transform flex-shrink-0 cursor-pointer"
+                      title={`${row.name}: ${v}% load`}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

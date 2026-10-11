@@ -1,422 +1,760 @@
-import React from "react";
-import { Users, Monitor, Cpu, MemoryStick, Activity, Zap, HardDrive, CheckCircle2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Monitor,
+  Cpu,
+  MemoryStick,
+  Activity,
+  Zap,
+  HardDrive,
+  Users,
+  Play,
+  Pause,
+  XCircle,
+  ArrowRight,
+  RefreshCw,
+  Sliders,
+  Sparkles,
+  Bot,
+} from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
+import { useToast } from "../components/Toast";
 
-// ─── Chart Data ───────────────────────────────────────────────────────────────
-const cpuData = Array.from({ length: 20 }, (_, i) => ({ v: Math.round(40 + Math.sin(i / 3) * 20 + Math.random() * 15) }));
-const memData = Array.from({ length: 20 }, (_, i) => ({ v: Math.round(40 + Math.sin(i / 3) * 20 + Math.random() * 15) }));
-const netData = Array.from({ length: 20 }, (_, i) => ({ v: Math.round(40 + Math.sin(i / 3) * 20 + Math.random() * 15) }));
-const diskData = Array.from({ length: 20 }, (_, i) => ({ v: Math.round(40 + Math.sin(i / 3) * 20 + Math.random() * 15) }));
-
-// ─── Metric Cards ─────────────────────────────────────────────────────────────
-const metricCards = [
-  { label: "Connected Devices", value: "8", sub: "+2 today", icon: Monitor, color: "#8B5CF6" },
-  { label: "CPU Cores", value: "48", sub: "3.2 GHz avg", icon: Cpu, color: "#7C5CFC" },
-  { label: "Available RAM", value: "124 GB", sub: "of 192 GB", icon: MemoryStick, color: "#10B981" },
-  { label: "Running Tasks", value: "3", sub: "2 queued", icon: Activity, color: "#F59E0B" },
-  { label: "Processing", value: "2.4 GH/s", sub: "peak 3.1", icon: Zap, color: "#8B5CF6" },
-  { label: "Storage", value: "247 GB", sub: "512 GB total", icon: HardDrive, color: "#0EA5E9" },
+// ─── Chart Data with Vibrant Solar Orange Curves ─────────────────────────────
+const computeLoadData = [
+  { v: 62 }, { v: 68 }, { v: 75 }, { v: 72 }, { v: 84 }, { v: 80 }, { v: 78 },
+  { v: 82 }, { v: 76 }, { v: 68 }, { v: 70 }, { v: 62 }, { v: 54 }, { v: 58 },
+  { v: 64 }, { v: 66 }, { v: 70 }, { v: 74 }, { v: 80 }, { v: 84 },
 ];
 
-// ─── Mini Progress Bar ─────────────────────────────────────────────────────────
-function MiniBar({ pct, color }: { pct: number; color: string }) {
-  return (
-    <div style={{ width: 60, height: 4, borderRadius: 2, background: "#F1F4F9", overflow: "hidden" }}>
-      <div className="progress-bar-fill" style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 2 }} />
-    </div>
-  );
-}
+const memoryMeshData = [
+  { v: 70 }, { v: 72 }, { v: 75 }, { v: 78 }, { v: 80 }, { v: 79 }, { v: 76 },
+  { v: 78 }, { v: 74 }, { v: 72 }, { v: 73 }, { v: 70 }, { v: 68 }, { v: 65 },
+  { v: 68 }, { v: 71 }, { v: 74 }, { v: 76 }, { v: 78 }, { v: 76 },
+];
 
-// ─── Performance Chart Card ───────────────────────────────────────────────────
-function ChartCard({ label, value, data, color }: { label: string; value: string; data: { v: number }[]; color: string }) {
-  return (
-    <div className="card-sm" style={{ padding: 12 }}>
-      <div style={{ fontSize: 11, color: "#98A2B3", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>{label}</div>
-      <div style={{ fontSize: 18, fontWeight: 700, color: "#111827", marginBottom: 4 }}>{value}</div>
-      <ResponsiveContainer width="100%" height={60}>
-        <AreaChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-          <defs>
-            <linearGradient id={`fill-${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.2} />
-              <stop offset="100%" stopColor={color} stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <Area
-            type="monotone"
-            dataKey="v"
-            stroke={color}
-            strokeWidth={1.5}
-            fill={`url(#fill-${color.replace("#", "")})`}
-            dot={false}
-            isAnimationActive={true}
-            animationDuration={900}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
+const p2pTrafficData = [
+  { v: 55 }, { v: 68 }, { v: 78 }, { v: 84 }, { v: 90 }, { v: 88 }, { v: 82 },
+  { v: 76 }, { v: 68 }, { v: 60 }, { v: 52 }, { v: 48 }, { v: 55 }, { v: 64 },
+  { v: 60 }, { v: 68 }, { v: 72 }, { v: 80 }, { v: 86 }, { v: 90 },
+];
 
-// ─── Network Topology SVG ─────────────────────────────────────────────────────
-function NetworkTopology() {
-  const master = { x: 180, y: 110 };
-  const workers = [
-    { label: "Laptop", x: 60,  y: 45,  r: 14, stroke: "#E6EAF0", fill: "#FFFFFF", status: "idle" },
-    { label: "PC",     x: 165, y: 30,  r: 14, stroke: "#E6EAF0", fill: "#FFFFFF", status: "idle" },
-    { label: "Mac",    x: 285, y: 45,  r: 14, stroke: "#10B981", fill: "#ECFDF5", status: "online" },
-    { label: "RPi",    x: 320, y: 130, r: 12, stroke: "#E6EAF0", fill: "#FFFFFF", status: "idle" },
-    { label: "Android",x: 270, y: 200, r: 12, stroke: "#F59E0B", fill: "#FFFBEB", status: "busy" },
-    { label: "Tablet", x: 90,  y: 200, r: 12, stroke: "#E6EAF0", fill: "#FFFFFF", status: "idle" },
-    { label: "NAS",    x: 30,  y: 130, r: 12, stroke: "#EF4444", fill: "#F9FAFB", status: "offline" },
-  ];
-  const statusDotColor: Record<string, string> = {
-    online: "#10B981", busy: "#F59E0B", idle: "#98A2B3", offline: "#EF4444",
-  };
-  const activeIds = [2, 4]; // Mac and Android
+const diskThroughputData = [
+  { v: 40 }, { v: 48 }, { v: 56 }, { v: 65 }, { v: 68 }, { v: 66 }, { v: 62 },
+  { v: 58 }, { v: 52 }, { v: 46 }, { v: 44 }, { v: 40 }, { v: 45 }, { v: 48 },
+  { v: 50 }, { v: 54 }, { v: 58 }, { v: 60 }, { v: 58 }, { v: 55 },
+];
 
-  return (
-    <div style={{ width: "100%", position: "relative" }}>
-      <svg width="100%" viewBox="0 0 360 220" style={{ display: "block" }}>
-        <defs>
-          <linearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#8B5CF6" />
-            <stop offset="100%" stopColor="#7C5CFC" />
-          </linearGradient>
-          <filter id="master-shadow" x="-40%" y="-40%" width="180%" height="180%">
-            <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#8B5CF6" floodOpacity="0.3" />
-          </filter>
-        </defs>
-
-        {/* Lines: all workers */}
-        {workers.map((w, i) => (
-          <line
-            key={`line-${i}`}
-            x1={master.x} y1={master.y}
-            x2={w.x} y2={w.y}
-            stroke="#E6EAF0" strokeWidth={1}
-            className="network-line"
-          />
-        ))}
-
-        {/* Active task lines: dashed blue */}
-        {activeIds.map((idx) => {
-          const w = workers[idx];
-          return (
-            <line
-              key={`active-${idx}`}
-              x1={master.x} y1={master.y}
-              x2={w.x} y2={w.y}
-              stroke="#8B5CF6" strokeWidth={2}
-              strokeOpacity={0.18}
-              strokeDasharray="4 4"
-              style={{ animation: "dash-move 1.2s linear infinite" }}
-            />
-          );
-        })}
-
-        {/* Animated particles on active lines */}
-        {activeIds.map((idx) => {
-          const w = workers[idx];
-          const dur = 1.4 + idx * 0.3;
-          return (
-            <circle key={`particle-${idx}`} r={3} fill="#8B5CF6">
-              <animateMotion
-                dur={`${dur}s`}
-                repeatCount="indefinite"
-                path={`M${master.x},${master.y} L${w.x},${w.y}`}
-              />
-            </circle>
-          );
-        })}
-
-        {/* Worker nodes */}
-        {workers.map((w, i) => (
-          <g key={`w-${i}`}>
-            <circle cx={w.x} cy={w.y} r={w.r} fill={w.fill} stroke={w.stroke} strokeWidth={1.5} />
-            {/* status dot */}
-            <circle cx={w.x + w.r - 3} cy={w.y - w.r + 3} r={3} fill={statusDotColor[w.status]} />
-            <text x={w.x} y={w.y + w.r + 9} textAnchor="middle" fill="#667085" fontSize={9}>{w.label}</text>
-          </g>
-        ))}
-
-        {/* Master node */}
-        <circle cx={master.x} cy={master.y} r={30} fill="none" stroke="url(#grad)" strokeWidth={1.5} />
-        <circle cx={master.x} cy={master.y} r={24} fill="#FFFFFF" stroke="#8B5CF6" strokeWidth={2} filter="url(#master-shadow)" />
-        <text x={master.x} y={master.y + 5} textAnchor="middle" fill="#8B5CF6" fontSize={12} fontWeight="bold">M</text>
-      </svg>
-
-      <style>{`
-        @keyframes dash-move { to { stroke-dashoffset: -12; } }
-      `}</style>
-
-      <p style={{ fontSize: 10, color: "#98A2B3", textAlign: "center", marginTop: 4 }}>Tap a node to view details</p>
-    </div>
-  );
-}
-
-// ─── Worker Avatars ───────────────────────────────────────────────────────────
-const avatarColors = ["#8B5CF6", "#7C5CFC", "#10B981", "#F59E0B", "#0EA5E9"];
-const avatarInitials = ["DX", "MC", "LP", "AR", "TB"];
-
-// ─── Task Row ─────────────────────────────────────────────────────────────────
-function TaskRow({
-  name, status, pct, last,
-}: { name: string; status: "Running" | "Completed"; pct?: number; last?: boolean }) {
-  const isRunning = status === "Running";
+// ─── Mini Area Chart Component ───────────────────────────────────────────────
+function OrangeMetricCard({
+  label,
+  value,
+  data,
+}: {
+  label: string;
+  value: string;
+  data: { v: number }[];
+}) {
   return (
     <div
       style={{
+        backgroundColor: "#18191E",
+        border: "1px solid #24262E",
+        borderRadius: 14,
+        padding: "16px 18px",
         display: "flex",
-        alignItems: "center",
-        gap: 10,
-        paddingTop: 10,
-        paddingBottom: 10,
-        borderBottom: last ? "none" : "1px solid #E6EAF0",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        minHeight: 140,
       }}
     >
-      {/* Icon */}
-      <div style={{
-        width: 28, height: 28, borderRadius: 8,
-        background: isRunning ? "#F3E8FF" : "#ECFDF5",
-        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-      }}>
-        {isRunning
-          ? <Activity size={14} color="#8B5CF6" />
-          : <CheckCircle2 size={14} color="#10B981" />}
+      <div>
+        <div
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: "#8E929E",
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            marginBottom: 4,
+          }}
+        >
+          {label}
+        </div>
+        <div style={{ fontSize: 24, fontWeight: 700, color: "#FFFFFF" }}>
+          {value}
+        </div>
       </div>
 
-      {/* Name + badge */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name}</div>
-        <span style={{
-          fontSize: 10, fontWeight: 600,
-          color: isRunning ? "#8B5CF6" : "#10B981",
-          background: isRunning ? "#F3E8FF" : "#ECFDF5",
-          borderRadius: 20, padding: "1px 6px", display: "inline-block", marginTop: 2,
-        }}>{status}</span>
-      </div>
-
-      {/* Right side */}
-      <div style={{ flexShrink: 0, textAlign: "right" }}>
-        {isRunning && pct !== undefined ? (
-          <>
-            <div style={{ width: 72, height: 6, borderRadius: 3, background: "#F1F4F9", overflow: "hidden", marginBottom: 3 }}>
-              <div className="progress-bar-fill" style={{ width: `${pct}%`, height: "100%", background: "#8B5CF6", borderRadius: 3 }} />
-            </div>
-            <div style={{ fontSize: 11, color: "#667085" }}>{pct}%</div>
-          </>
-        ) : (
-          <CheckCircle2 size={16} color="#10B981" />
-        )}
+      <div style={{ height: 54, width: "100%", marginTop: 8 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id={`orangeGrad-${label.replace(/\s+/g, "")}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#FF7A00" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="#FF7A00" stopOpacity={0.0} />
+              </linearGradient>
+            </defs>
+            <Area
+              type="monotone"
+              dataKey="v"
+              stroke="#FF7A00"
+              strokeWidth={2}
+              fill={`url(#orangeGrad-${label.replace(/\s+/g, "")})`}
+              dot={false}
+              isAnimationActive={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
 }
 
-// ─── Main Dashboard ───────────────────────────────────────────────────────────
-export default function DashboardPage() {
-  const [metrics, setMetrics] = React.useState<any>(null);
-
-  React.useEffect(() => {
-    const fetchDashboard = () => {
-      fetch('/api/dashboard')
-        .then(res => res.json())
-        .then(data => setMetrics(data))
-        .catch(err => console.error("Failed to fetch dashboard", err));
-    };
-    fetchDashboard();
-    const interval = setInterval(fetchDashboard, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const dMetrics = metrics ? [
-    { label: "Connected Devices", value: metrics.metrics.connectedDevices.toString(), sub: `${metrics.metrics.onlineDevices} online`, icon: Monitor, color: "#8B5CF6" },
-    { label: "CPU Cores", value: "48", sub: "3.2 GHz avg", icon: Cpu, color: "#7C5CFC" },
-    { label: "Available RAM", value: "124 GB", sub: "of 192 GB", icon: MemoryStick, color: "#10B981" },
-    { label: "Running Tasks", value: metrics.metrics.runningTasks.toString(), sub: `${metrics.metrics.queuedTasks} queued`, icon: Activity, color: "#F59E0B" },
-    { label: "Processing", value: "2.4 GH/s", sub: "peak 3.1", icon: Zap, color: "#8B5CF6" },
-    { label: "Storage", value: "247 GB", sub: "512 GB total", icon: HardDrive, color: "#0EA5E9" },
-  ] : metricCards;
-
-  const dCharts = metrics ? metrics.charts : { cpuData, memData, netData, diskData };
+// ─── Interactive Mesh Topology (Image 2) ──────────────────────────────────────
+function MeshTopology({ onSelectWorker }: { onSelectWorker: (name: string) => void }) {
+  const master = { x: 300, y: 190 };
+  const nodes = [
+    { name: "Laptop",  x: 180, y: 110, r: 24, stroke: "#32353E", fill: "#18191E", type: "idle",   active: false },
+    { name: "PC",      x: 300, y: 80,  r: 24, stroke: "#32353E", fill: "#18191E", type: "idle",   active: false },
+    { name: "Mac",     x: 440, y: 110, r: 24, stroke: "#FF7A00", fill: "#24160E", type: "online", active: true },
+    { name: "RPi",     x: 480, y: 230, r: 20, stroke: "#32353E", fill: "#18191E", type: "idle",   active: false },
+    { name: "Android", x: 420, y: 310, r: 22, stroke: "#FF7A00", fill: "#24160E", type: "busy",   active: true },
+    { name: "Tablet",  x: 190, y: 310, r: 20, stroke: "#32353E", fill: "#18191E", type: "idle",   active: false },
+    { name: "NAS",     x: 130, y: 220, r: 22, stroke: "#EF4444", fill: "#2A1414", type: "offline",active: false },
+  ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F7F9FC", fontFamily: "'Inter', system-ui, sans-serif", padding: "0 16px", maxWidth: 480, margin: "0 auto" }}>
-
-      {/* ── Section 1: Greeting Header ── */}
-      <div className="animate-fade-in-up" style={{ paddingTop: 8, paddingBottom: 16, paddingLeft: 0, paddingRight: 0, display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-        <div>
-          <div style={{ fontSize: 20, fontWeight: 600, color: "#111827" }}>Good morning, Alex</div>
-          <div style={{ fontSize: 13, color: "#98A2B3", marginTop: 2 }}>Compute Overview · Aug 23</div>
-        </div>
-        <div style={{
-          display: "flex", alignItems: "center", gap: 5,
-          background: "#ECFDF5", borderRadius: 9999, padding: "4px 10px",
-          fontSize: 11, color: "#10B981", fontWeight: 600, marginTop: 2, flexShrink: 0,
-        }}>
-          <span className="pulse-dot" />
-          LAN Connected
-        </div>
+    <div
+      style={{
+        width: "100%",
+        backgroundColor: "#18191E",
+        border: "1px solid #24262E",
+        borderRadius: 16,
+        padding: "20px 24px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <span style={{ fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>
+          Mesh Topology
+        </span>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: "#FF7A00",
+            backgroundColor: "rgba(255, 122, 0, 0.15)",
+            border: "1px solid rgba(255, 122, 0, 0.4)",
+            borderRadius: 6,
+            padding: "3px 8px",
+            letterSpacing: "0.06em",
+          }}
+        >
+          LIVE SYNC
+        </span>
       </div>
 
-      {/* ── Section 2: Scrollable Metric Cards ── */}
-      <div
-        className="animate-fade-in-up metric-scroll"
-        style={{
-          display: "flex", overflowX: "auto", gap: 12,
-          marginLeft: -16, marginRight: -16,
-          paddingLeft: 16, paddingRight: 16,
-          paddingBottom: 4,
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        } as React.CSSProperties}
-      >
-        <style>{`
-          .metric-scroll::-webkit-scrollbar { display: none; }
-          @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-        `}</style>
-        {metricCards.map(({ label, value, sub, icon: Icon, color }) => (
-          <div
-            key={label}
-            style={{
-              background: "#FFFFFF", border: "1px solid #E6EAF0", borderRadius: 14,
-              padding: 16, minWidth: 130, flexShrink: 0,
-            }}
-          >
-            <div style={{
-              width: 32, height: 32, borderRadius: 10,
-              background: `${color}1F`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              color, marginBottom: 8,
-            }}>
-              <Icon size={16} />
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: "#111827", lineHeight: 1 }}>{value}</div>
-            <div style={{ fontSize: 11, color: "#98A2B3", marginTop: 3 }}>{label}</div>
-            <div style={{ fontSize: 11, color: "#98A2B3", marginTop: 2, opacity: 0.7 }}>{sub}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Section 3: Master Node ── */}
-      <div className="card animate-fade-in-up" style={{ padding: 16, marginBottom: 12, marginTop: 16 }}>
-        {/* Top row */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-          <div style={{ fontSize: 12, color: "#98A2B3", textTransform: "uppercase", letterSpacing: "0.07em", fontWeight: 600 }}>Master Node</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#10B981", fontWeight: 600 }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#10B981", display: "inline-block" }} />
-            Online
-          </div>
-        </div>
-
-        <div className="mono" style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>DESKTOP-A7X</div>
-        <div className="mono" style={{ fontSize: 13, color: "#667085", marginBottom: 12 }}>192.168.1.101</div>
-
-        {/* Inline metrics */}
-        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-          {[
-            { label: "CPU", val: "78%", pct: 78 },
-            { label: "RAM", val: "65%", pct: 65 },
-            { label: "Uptime", val: "14h 23m", pct: null },
-          ].map(({ label, val, pct }) => (
-            <div key={label} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              <div style={{ fontSize: 10, color: "#98A2B3", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{val}</div>
-              {pct !== null && <MiniBar pct={pct} color="#8B5CF6" />}
-            </div>
+      <div style={{ width: "100%", maxWidth: 620, margin: "0 auto" }}>
+        <svg viewBox="0 0 600 380" style={{ width: "100%", height: "auto", display: "block" }}>
+          {/* Background connection rays */}
+          {nodes.map((node, i) => (
+            <line
+              key={`conn-${i}`}
+              x1={master.x}
+              y1={master.y}
+              x2={node.x}
+              y2={node.y}
+              stroke={node.active ? "#FF7A00" : "#282A32"}
+              strokeWidth={node.active ? 2.5 : 1.5}
+              strokeDasharray={node.active ? "6 6" : "none"}
+              opacity={node.active ? 0.9 : 0.4}
+            />
           ))}
+
+          {/* Peripheral Nodes */}
+          {nodes.map((node) => (
+            <g
+              key={node.name}
+              onClick={() => onSelectWorker(node.name)}
+              style={{ cursor: "pointer" }}
+            >
+              <circle
+                cx={node.x}
+                cy={node.y}
+                r={node.r}
+                stroke={node.stroke}
+                strokeWidth={node.active ? 3 : 2}
+                fill={node.fill}
+              />
+              <text
+                x={node.x}
+                y={node.y + node.r + 18}
+                textAnchor="middle"
+                fill="#CBD5E1"
+                fontSize="14"
+                fontWeight="600"
+                fontFamily="system-ui, sans-serif"
+              >
+                {node.name}
+              </text>
+            </g>
+          ))}
+
+          {/* Central Master Node "M" with Radiant Orange Glow */}
+          <circle
+            cx={master.x}
+            cy={master.y}
+            r="48"
+            fill="rgba(255, 122, 0, 0.18)"
+          />
+          <circle
+            cx={master.x}
+            cy={master.y}
+            r="34"
+            fill="url(#masterGrad)"
+            stroke="#FF8A00"
+            strokeWidth="3"
+            style={{ filter: "drop-shadow(0 0 16px rgba(255, 122, 0, 0.6))" }}
+          />
+          <defs>
+            <radialGradient id="masterGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#FFA033" />
+              <stop offset="100%" stopColor="#FF5500" />
+            </radialGradient>
+          </defs>
+          <text
+            x={master.x}
+            y={master.y + 9}
+            textAnchor="middle"
+            fill="#FFFFFF"
+            fontSize="26"
+            fontWeight="900"
+            fontFamily="system-ui, sans-serif"
+          >
+            M
+          </text>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Dashboard Page Component ───────────────────────────────────────────
+export default function DashboardPage() {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+
+  const [jobStatus, setJobStatus] = useState<"running" | "paused">("running");
+  const [jobProgress, setJobProgress] = useState(67);
+  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+
+  // Poll job progress
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (jobStatus === "running") {
+        setJobProgress((prev) => (prev >= 99 ? 67 : prev + 1));
+      }
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [jobStatus]);
+
+  const handleToggleJob = () => {
+    if (jobStatus === "running") {
+      setJobStatus("paused");
+      showToast({ type: "info", message: "Paused job: 4K Video Transcoding" });
+    } else {
+      setJobStatus("running");
+      showToast({ type: "success", message: "Resumed job: 4K Video Transcoding" });
+    }
+  };
+
+  const handleAbortJob = () => {
+    showToast({ type: "warning", message: "Job aborted and chunks cleared." });
+    setJobProgress(0);
+    setJobStatus("paused");
+  };
+
+  return (
+    <div style={{ padding: "20px 24px", maxWidth: 1400, margin: "0 auto" }}>
+      {/* ── Section 0: Gemini AI Grid Copilot Banner ── */}
+      <div
+        className="bg-gradient-to-r from-[#181922] via-[#1A1C24] to-[#16171E] border border-[#2B2D38] hover:border-[#FF7A00]/40 transition-all rounded-2xl p-4 mb-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg shadow-black/30"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF7A00]/20 to-[#FF4500]/10 border border-[#FF7A00]/30 flex items-center justify-center text-[#FF7A00] flex-shrink-0 shadow-[0_0_15px_rgba(255,122,0,0.25)]">
+            <Sparkles className="w-5 h-5 animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-white uppercase tracking-wider">
+                Gemini Grid Copilot
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono font-semibold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                Active Grounding
+              </span>
+            </div>
+            <p className="text-xs text-[#9DA2B0] mt-0.5">
+              Analyzing 8 edge nodes • Wi-Fi cloudlet latency optimal (8-14ms) • 0 packet drops
+            </p>
+          </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 10, fontSize: 12, color: "#667085" }}>
-          <Users size={12} />
-          5 workers connected
+        <div className="flex items-center gap-2.5 w-full md:w-auto">
+          <button
+            onClick={() => {
+              const btn = document.getElementById("gemini-agent-toggle-btn");
+              if (btn) btn.click();
+            }}
+            className="flex-1 md:flex-initial px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF7A00] to-[#FF5500] hover:brightness-110 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-[#FF7A00]/25 cursor-pointer"
+          >
+            <Bot size={14} />
+            <span>Consult AI Agent</span>
+          </button>
         </div>
       </div>
 
-      {/* ── Section 4: Network Topology ── */}
-      <div className="card animate-fade-in-up" style={{ padding: 16, marginBottom: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>Network</div>
-          <div style={{
-            fontSize: 11, fontWeight: 700, color: "#10B981",
-            border: "1px solid #10B981", borderRadius: 4, padding: "1px 6px",
-            animation: "blink 1.4s ease-in-out infinite",
-          }}>LIVE</div>
-        </div>
-        <NetworkTopology />
-      </div>
-
-      {/* ── Section 5: Current Job ── */}
-      <div className="card animate-fade-in-up" style={{ padding: 16, marginBottom: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-          <div style={{ fontSize: 12, color: "#98A2B3", textTransform: "uppercase", letterSpacing: "0.07em", fontWeight: 600 }}>Current Job</div>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#8B5CF6", background: "#F3E8FF", borderRadius: 20, padding: "2px 8px" }}>Running</span>
-        </div>
-
-        <div style={{ fontSize: 15, fontWeight: 600, color: "#111827", marginBottom: 12 }}>4K Video Transcoding — Episode 12</div>
-
-        {/* Progress bar */}
-        <div style={{ width: "100%", height: 8, borderRadius: 4, background: "#F1F4F9", overflow: "hidden", marginBottom: 6 }}>
-          <div className="progress-bar-fill" style={{ width: "67%", height: "100%", background: "#8B5CF6", borderRadius: 4 }} />
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-          <span style={{ fontSize: 13, color: "#667085" }}>67% · ETA 41 min</span>
-          <span style={{ fontSize: 13, color: "#667085" }}>2.4 GB/s</span>
-        </div>
-
-        {/* Worker avatars */}
-        <div style={{ display: "flex", marginBottom: 10 }}>
-          {avatarInitials.map((init, i) => (
-            <div
-              key={i}
+      {/* ── Section 1: CURRENT JOB Card (Image 1) ── */}
+      <div
+        style={{
+          backgroundColor: "#18191E",
+          border: "1px solid #282A32",
+          borderRadius: 16,
+          padding: 24,
+          marginBottom: 20,
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#8E929E", letterSpacing: "0.08em" }}>
+            CURRENT JOB
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span
               style={{
-                width: 24, height: 24, borderRadius: "50%",
-                background: avatarColors[i],
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 9, fontWeight: 700, color: "#FFFFFF",
-                border: "2px solid #FFFFFF",
-                marginLeft: i === 0 ? 0 : -6, zIndex: 5 - i,
+                backgroundColor: "#FF7A00",
+                color: "#FFFFFF",
+                fontSize: 12,
+                fontWeight: 700,
+                padding: "3px 12px",
+                borderRadius: 20,
+                boxShadow: "0 0 10px rgba(255, 122, 0, 0.4)",
               }}
             >
-              {init}
-            </div>
-          ))}
+              {jobStatus === "running" ? "Processing" : "Paused"}
+            </span>
+
+            <button
+              onClick={handleToggleJob}
+              style={{
+                background: "none",
+                border: "1px solid #282A32",
+                borderRadius: 8,
+                padding: "4px 10px",
+                color: "#CBD5E1",
+                cursor: "pointer",
+                fontSize: 12,
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              {jobStatus === "running" ? <Pause size={13} /> : <Play size={13} />}
+              {jobStatus === "running" ? "Pause" : "Resume"}
+            </button>
+
+            <button
+              onClick={handleAbortJob}
+              style={{
+                background: "none",
+                border: "1px solid #282A32",
+                borderRadius: 8,
+                padding: "4px 8px",
+                color: "#EF4444",
+                cursor: "pointer",
+                fontSize: 12,
+              }}
+            >
+              <XCircle size={14} />
+            </button>
+          </div>
         </div>
 
-        {/* Stat pills */}
-        <div style={{ display: "flex", gap: 8 }}>
-          {["5 Workers", "25 Chunks"].map((label) => (
+        <div style={{ fontSize: 18, fontWeight: 700, color: "#FFFFFF", marginBottom: 14 }}>
+          4K Video Transcoding — Episode 12
+        </div>
+
+        {/* Glowing Orange Progress Bar */}
+        <div
+          style={{
+            height: 8,
+            backgroundColor: "#141519",
+            borderRadius: 6,
+            overflow: "hidden",
+            marginBottom: 10,
+          }}
+        >
+          <div
+            style={{
+              width: `${jobProgress}%`,
+              height: "100%",
+              background: "linear-gradient(90deg, #FF8A00 0%, #FF5500 100%)",
+              boxShadow: "0 0 12px rgba(255, 122, 0, 0.6)",
+              borderRadius: 6,
+              transition: "width 0.4s ease",
+            }}
+          />
+        </div>
+
+        {/* ETA & Speed */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <span style={{ fontSize: 13, color: "#CBD5E1", fontWeight: 500 }}>
+            {jobProgress}% • ETA 41 min
+          </span>
+          <span style={{ fontSize: 13, color: "#CBD5E1", fontWeight: 700 }}>
+            2.4 GB/s
+          </span>
+        </div>
+
+        {/* Metadata Badges */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {["5 Workers", "25 Chunks", "GPU Accelerated"].map((tag) => (
+            <span
+              key={tag}
+              style={{
+                backgroundColor: "#20222A",
+                border: "1px solid #2E313C",
+                color: "#CBD5E1",
+                fontSize: 12,
+                fontWeight: 600,
+                borderRadius: 8,
+                padding: "4px 12px",
+              }}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Section 2: 4 Telemetry Mini-Charts (Image 1) ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+          gap: 16,
+          marginBottom: 20,
+        }}
+      >
+        <OrangeMetricCard label="COMPUTE LOAD" value="84%" data={computeLoadData} />
+        <OrangeMetricCard label="MEMORY MESH" value="76%" data={memoryMeshData} />
+        <OrangeMetricCard label="P2P TRAFFIC" value="90 MB/s" data={p2pTrafficData} />
+        <OrangeMetricCard label="DISK THROUGHPUT" value="55 MB/s" data={diskThroughputData} />
+      </div>
+
+      {/* ── Section 3: Grid Monitor & Master Node (Image 3) ── */}
+      <div
+        style={{
+          backgroundColor: "#18191E",
+          border: "1px solid #24262E",
+          borderRadius: 16,
+          padding: 24,
+          marginBottom: 20,
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: "#FFFFFF", margin: "0 0 4px" }}>
+              Grid Monitor
+            </h2>
+            <div style={{ fontSize: 13, color: "#8E929E" }}>
+              Cluster Telemetry & Workload Overview
+            </div>
+          </div>
+          <span
+            style={{
+              backgroundColor: "rgba(255, 122, 0, 0.15)",
+              color: "#FF7A00",
+              border: "1px solid rgba(255, 122, 0, 0.35)",
+              borderRadius: 20,
+              padding: "4px 12px",
+              fontSize: 12,
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF7A00", boxShadow: "0 0 6px #FF7A00" }} />
+            Live Grid Online
+          </span>
+        </div>
+
+        {/* 6 Grid Metric Stat Cards */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+            gap: 12,
+            marginBottom: 20,
+          }}
+        >
+          {[
+            { label: "Connected Devices", val: "8", sub: "7 online", icon: Monitor },
+            { label: "CPU Cores", val: "48", sub: "3.2 GHz avg", icon: Cpu },
+            { label: "Available RAM", val: "124 GB", sub: "of 192 GB", icon: MemoryStick },
+            { label: "Running Tasks", val: "0", sub: "0 queued", icon: Activity },
+            { label: "Processing", val: "2.4 GH/s", sub: "peak 3.1", icon: Zap },
+            { label: "Storage", val: "247 GB", sub: "512 GB total", icon: HardDrive },
+          ].map(({ label, val, sub, icon: Icon }) => (
             <div
               key={label}
-              style={{ fontSize: 11, fontWeight: 600, color: "#667085", background: "#F7F9FC", border: "1px solid #E6EAF0", borderRadius: 20, padding: "3px 10px" }}
+              style={{
+                backgroundColor: "#141519",
+                border: "1px solid #24262E",
+                borderRadius: 12,
+                padding: "14px 16px",
+              }}
             >
-              {label}
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: 8,
+                  backgroundColor: "rgba(255, 122, 0, 0.12)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#FF7A00",
+                  marginBottom: 8,
+                }}
+              >
+                <Icon size={16} />
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: "#FFFFFF", lineHeight: 1.1 }}>
+                {val}
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 500, color: "#CBD5E1", marginTop: 4 }}>
+                {label}
+              </div>
+              <div style={{ fontSize: 11, color: "#8E929E", marginTop: 2 }}>
+                {sub}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Master Node Banner Card */}
+        <div
+          style={{
+            backgroundColor: "#141519",
+            border: "1px solid #282A32",
+            borderRadius: 12,
+            padding: 18,
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#8E929E", letterSpacing: "0.08em" }}>
+              MASTER NODE
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#FF7A00", fontWeight: 600 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF7A00" }} />
+              Active Controller
+            </div>
+          </div>
+
+          <div style={{ fontSize: 16, fontWeight: 700, color: "#FFFFFF", marginBottom: 2 }}>
+            DESKTOP-A7X
+          </div>
+          <div style={{ fontSize: 13, color: "#8E929E", marginBottom: 14 }}>
+            192.168.1.101 • Port 3001
+          </div>
+
+          <div style={{ display: "flex", gap: 28, flexWrap: "wrap", marginBottom: 12 }}>
+            <div>
+              <div style={{ fontSize: 10, color: "#8E929E", fontWeight: 600 }}>CPU UTILIZATION</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>78%</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: "#8E929E", fontWeight: 600 }}>RAM ALLOCATION</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>65%</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: "#8E929E", fontWeight: 600 }}>CLUSTER UPTIME</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>14h 23m</div>
+            </div>
+          </div>
+
+          <div style={{ fontSize: 12, color: "#CBD5E1", display: "flex", alignItems: "center", gap: 6 }}>
+            <Users size={14} color="#FF7A00" />
+            <span>5 Active Worker Nodes Offloading Tasks</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section 4: Interactive Mesh Topology (Image 2) ── */}
+      <div style={{ marginBottom: 20 }}>
+        <MeshTopology onSelectWorker={(workerName) => setSelectedNode(workerName)} />
+      </div>
+
+      {/* ── Section 5: Recent Tasks (Image 1) ── */}
+      <div
+        style={{
+          backgroundColor: "#18191E",
+          border: "1px solid #24262E",
+          borderRadius: 16,
+          padding: 24,
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <span style={{ fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>
+            Recent Tasks
+          </span>
+          <button
+            onClick={() => navigate("/tasks")}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#FF7A00",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            View All →
+          </button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {[
+            { name: "4K Video Transcoding", status: "Running", pct: 67, speed: "2.4 GB/s" },
+            { name: "Federated Sensor Aggregate #41", status: "Completed", pct: 100, speed: "1.8 GB/s" },
+            { name: "OCR Batch Processing Q3", status: "Completed", pct: 100, speed: "3.1 GB/s" },
+          ].map((task) => (
+            <div
+              key={task.name}
+              onClick={() => navigate("/tasks")}
+              style={{
+                backgroundColor: "#141519",
+                border: "1px solid #24262E",
+                borderRadius: 12,
+                padding: "14px 16px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                cursor: "pointer",
+                transition: "border-color 0.15s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#FF7A00")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#24262E")}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    backgroundColor: "rgba(255, 122, 0, 0.12)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#FF7A00",
+                  }}
+                >
+                  <Activity size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>
+                    {task.name}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+                    <span
+                      style={{
+                        backgroundColor: task.status === "Running" ? "rgba(255, 122, 0, 0.18)" : "rgba(16, 185, 129, 0.18)",
+                        color: task.status === "Running" ? "#FF7A00" : "#10B981",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: "2px 8px",
+                        borderRadius: 12,
+                      }}
+                    >
+                      {task.status}
+                    </span>
+                    <span style={{ fontSize: 12, color: "#8E929E" }}>{task.speed}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ width: 100, textAlign: "right" }}>
+                <div
+                  style={{
+                    height: 5,
+                    backgroundColor: "#20222A",
+                    borderRadius: 3,
+                    overflow: "hidden",
+                    marginBottom: 4,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${task.pct}%`,
+                      height: "100%",
+                      backgroundColor: task.status === "Running" ? "#FF7A00" : "#10B981",
+                    }}
+                  />
+                </div>
+                <span style={{ fontSize: 11, color: "#8E929E" }}>{task.pct}%</span>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── Section 6: Performance Mini-Charts 2×2 ── */}
-      <div className="animate-fade-in-up" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-        <ChartCard label="CPU" value="67%" data={cpuData} color="#8B5CF6" />
-        <ChartCard label="Memory" value="71%" data={memData} color="#7C5CFC" />
-        <ChartCard label="Network" value="142 MB/s" data={netData} color="#10B981" />
-        <ChartCard label="Disk I/O" value="54 MB/s" data={diskData} color="#F59E0B" />
-      </div>
-
-      {/* ── Section 7: Recent Tasks ── */}
-      <div className="card animate-fade-in-up" style={{ padding: 16, marginBottom: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>Recent Tasks</div>
-          <span style={{ fontSize: 13, color: "#8B5CF6", cursor: "pointer", fontWeight: 500 }}>View All</span>
+      {/* Node Inspection Modal */}
+      {selectedNode && (
+        <div className="modal-backdrop" onClick={() => setSelectedNode(null)}>
+          <div className="modal-content animate-fade-in-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#FFFFFF", marginBottom: 8 }}>
+              {selectedNode} Node Details
+            </div>
+            <div style={{ fontSize: 13, color: "#8E929E", marginBottom: 16 }}>
+              Worker status on local cluster mesh
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#CBD5E1", fontSize: 13 }}>
+                <span>Status:</span>
+                <span style={{ color: "#10B981", fontWeight: 600 }}>Active Online</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#CBD5E1", fontSize: 13 }}>
+                <span>Latency:</span>
+                <span>2ms roundtrip</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#CBD5E1", fontSize: 13 }}>
+                <span>Assigned Tasks:</span>
+                <span>2 active chunks</span>
+              </div>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+              <button className="btn-secondary" onClick={() => setSelectedNode(null)}>
+                Close
+              </button>
+              <button
+                className="btn-primary"
+                onClick={() => {
+                  setSelectedNode(null);
+                  navigate("/devices");
+                }}
+              >
+                Manage Device
+              </button>
+            </div>
+          </div>
         </div>
-        <TaskRow name="4K Video Transcoding" status="Running" pct={67} />
-        <TaskRow name="ML Model Training" status="Completed" />
-        <TaskRow name="OCR Batch Reports" status="Running" pct={89} last />
-      </div>
-
-      {/* Bottom clearance for mobile nav */}
-      <div style={{ paddingBottom: 96 }} />
+      )}
     </div>
   );
 }

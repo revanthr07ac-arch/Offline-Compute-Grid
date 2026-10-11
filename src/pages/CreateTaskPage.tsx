@@ -1,39 +1,53 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   ChevronLeft,
   UploadCloud,
   CheckCircle2,
   Check,
+  Server,
+  Cpu,
+  Layers,
+  ArrowRight,
+  FileCode,
+  Sliders,
+  Sparkles,
+  X,
+  Bot,
+  RefreshCw,
 } from "lucide-react";
+import { useToast } from "../components/Toast";
+import { generateOptimalTaskConfig } from "../services/geminiService";
 
 const STEP_TITLES = [
-  "Upload",
-  "Configure",
-  "Workers",
-  "Review",
-  "Done",
+  "Payload",
+  "Configuration",
+  "Node Allocation",
+  "Review & Dispatch",
+  "Complete",
 ];
 
-const TYPE_PILLS = ["Video", "Image", "Python", "Document", "Compression", "Custom"];
+const TYPE_PILLS = [
+  "4K Video Transcode",
+  "PyTorch DDP",
+  "OCR Batch",
+  "Blender Render",
+  "Data Hash",
+  "Custom Binary"
+];
+
 const PRIORITY_OPTIONS = [
-  { key: "critical", label: "Critical", bg: "#FEF2F2", color: "#EF4444" },
-  { key: "high", label: "High", bg: "#FFF7ED", color: "#F59E0B" },
-  { key: "medium", label: "Medium", bg: "#F3E8FF", color: "#8B5CF6" },
-  { key: "low", label: "Low", bg: "#F1F4F9", color: "#667085" },
+  { key: "critical", label: "Critical", bg: "rgba(239,68,68,0.15)", border: "rgba(239,68,68,0.3)", color: "#EF4444" },
+  { key: "high", label: "High", bg: "rgba(255,122,0,0.15)", border: "rgba(255,122,0,0.3)", color: "#FF7A00" },
+  { key: "medium", label: "Medium", bg: "rgba(245,158,11,0.15)", border: "rgba(245,158,11,0.3)", color: "#F59E0B" },
+  { key: "low", label: "Low", bg: "rgba(142,146,158,0.15)", border: "rgba(142,146,158,0.3)", color: "#8E929E" },
 ];
-const FILE_TYPE_CARDS = [
-  { emoji: "📷", label: "Images", ext: ".jpg .png" },
-  { emoji: "🎬", label: "Videos", ext: ".mp4 .mkv" },
-  { emoji: "📄", label: "Documents", ext: ".pdf" },
-  { emoji: "🐍", label: "Python", ext: ".py" },
-];
-const SOURCE_BUTTONS = ["Camera", "Files App", "Gallery"];
+
 const WORKER_OPTIONS = [
-  { id: "w1", name: "RPi-4 Node A", cpu: 28, ram: 45, online: true, color: "#8B5CF6" },
-  { id: "w2", name: "RPi-4 Node B", cpu: 51, ram: 62, online: true, color: "#7C5CFC" },
-  { id: "w3", name: "x86 Worker-1", cpu: 14, ram: 33, online: true, color: "#10B981" },
-  { id: "w4", name: "x86 Worker-2", cpu: 67, ram: 78, online: true, color: "#F59E0B" },
-  { id: "w5", name: "RPi-3 Backup", cpu: 5, ram: 18, online: false, color: "#98A2B3" },
+  { id: "w1", name: "DESKTOP-A7X (Master)", cpu: 78, ram: 65, online: true, role: "Coordinator & High VRAM" },
+  { id: "w2", name: "Mac-Studio (M2 Max)", cpu: 42, ram: 58, online: true, role: "Metal GPU Compute" },
+  { id: "w3", name: "Worker-Rig-RTX", cpu: 84, ram: 76, online: true, role: "CUDA Acceleration" },
+  { id: "w4", name: "Laptop-Dev", cpu: 32, ram: 44, online: true, role: "General Worker" },
+  { id: "w5", name: "RPi-4 Node A", cpu: 18, ram: 25, online: true, role: "Edge Chunk Node" },
 ];
 
 interface CreateTaskPageProps {
@@ -42,569 +56,502 @@ interface CreateTaskPageProps {
 }
 
 export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPageProps) {
+  const { showToast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
-  const [selectedFileType, setSelectedFileType] = useState<string | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-  const [taskName, setTaskName] = useState("");
-  const [taskType, setTaskType] = useState("Video");
-  const [priority, setPriority] = useState("medium");
-  const [splitSize, setSplitSize] = useState(10);
-  const [description, setDescription] = useState("");
-  const [selectedWorkers, setSelectedWorkers] = useState<string[]>(["w1", "w2", "w3"]);
-  const [submittedId] = useState(() => `task-${String(Math.floor(Math.random() * 9000) + 1000)}`);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>(["batch_input_stream.raw"]);
+  const [taskName, setTaskName] = useState("Distributed H.265 Render Batch");
+  const [taskType, setTaskType] = useState("4K Video Transcode");
+  const [priority, setPriority] = useState<"critical" | "high" | "medium" | "low">("high");
+  const [splitSize, setSplitSize] = useState(250); // MB
+  const [description, setDescription] = useState("Automated multi-worker split & encode across LAN grid nodes.");
+  const [selectedWorkers, setSelectedWorkers] = useState<string[]>(["w1", "w2", "w3", "w4"]);
+  const [submittedId] = useState(() => `t-${Math.floor(Math.random() * 9000 + 1000)}`);
+  const [isOptimizingWithAI, setIsOptimizingWithAI] = useState(false);
+  const [aiReasoning, setAiReasoning] = useState<string | null>(null);
 
-  const totalChunks = Math.ceil((splitSize > 0 ? 8400 / splitSize : 0));
-  const chunkSizeMB = splitSize;
+  const handleAiAutoConfig = async () => {
+    setIsOptimizingWithAI(true);
+    try {
+      const config = await generateOptimalTaskConfig(
+        taskName || "Distributed Cluster Computation",
+        WORKER_OPTIONS
+      );
+      setTaskName(config.taskName);
+      setTaskType(config.taskType);
+      setPriority(config.priority);
+      setSplitSize(config.splitSize);
+      if (config.selectedWorkerIds?.length) {
+        setSelectedWorkers(config.selectedWorkerIds);
+      }
+      setAiReasoning(config.reasoning);
+      showToast({ type: "success", message: "Gemini AI configured task parameters for optimal throughput!" });
+    } catch {
+      showToast({ type: "error", message: "Failed to optimize task with Gemini." });
+    } finally {
+      setIsOptimizingWithAI(false);
+    }
+  };
 
-  function toggleWorker(id: string) {
+  const toggleWorker = (id: string) => {
     setSelectedWorkers((prev) =>
       prev.includes(id) ? prev.filter((w) => w !== id) : [...prev, id]
     );
-  }
+  };
 
-  function handleNext() {
+  const handleSelectAllWorkers = () => {
+    if (selectedWorkers.length === WORKER_OPTIONS.length) {
+      setSelectedWorkers(["w1"]);
+    } else {
+      setSelectedWorkers(WORKER_OPTIONS.map((w) => w.id));
+    }
+  };
+
+  const handleFileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const names = Array.from(e.dataTransfer.files).map((f) => f.name);
+      setSelectedFiles((prev) => [...prev, ...names]);
+      showToast({ type: "success", message: `Added ${names.length} file(s).` });
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const names = Array.from(e.target.files).map((f) => f.name);
+      setSelectedFiles((prev) => [...prev, ...names]);
+      showToast({ type: "success", message: `Added ${names.length} file(s).` });
+    }
+  };
+
+  const handleNext = () => {
+    if (currentStep === 1 && selectedFiles.length === 0) {
+      showToast({ type: "warning", message: "Please select at least one file or payload." });
+      return;
+    }
+    if (currentStep === 2 && !taskName.trim()) {
+      showToast({ type: "warning", message: "Please provide a task name." });
+      return;
+    }
+    if (currentStep === 3 && selectedWorkers.length === 0) {
+      showToast({ type: "warning", message: "Please select at least one worker node." });
+      return;
+    }
+
     if (currentStep < 4) {
       setCurrentStep((s) => s + 1);
     } else if (currentStep === 4) {
-      setCurrentStep(5);
-      setTimeout(() => onSubmitted(submittedId), 1000);
-    }
-  }
+      // Create actual task in localStorage
+      const newTask = {
+        id: submittedId,
+        name: taskName.trim(),
+        type: taskType,
+        priority: priority,
+        progress: 0,
+        eta: "Starting...",
+        workers: selectedWorkers.length,
+        size: `${selectedFiles.length * 1.4} GB`,
+        by: "REVANTH R",
+        status: "running" as const,
+      };
 
-  const prioStyle = PRIORITY_OPTIONS.find((p) => p.key === priority);
+      try {
+        const saved = localStorage.getItem("ocg_tasks");
+        const existing = saved ? JSON.parse(saved) : [];
+        localStorage.setItem("ocg_tasks", JSON.stringify([newTask, ...existing]));
+      } catch {}
+
+      setCurrentStep(5);
+      showToast({ type: "success", message: "Task compiled and dispatched to cluster!" });
+      setTimeout(() => onSubmitted(submittedId), 1200);
+    }
+  };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F7F9FC", display: "flex", flexDirection: "column" }}>
-      {/* Step indicator header */}
-      <div
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 30,
-          background: "#FFFFFF",
-          borderBottom: "1px solid #E6EAF0",
-          paddingLeft: 16,
-          paddingRight: 16,
-          paddingTop: 12,
-          paddingBottom: 0,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingBottom: 12,
-          }}
-        >
+    <div className="min-h-screen bg-[#0B0C0E] text-[#FFFFFF] pb-24 flex flex-col">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+
+      {/* Top step navigation header */}
+      <div className="sticky top-0 z-30 bg-[#111217]/95 backdrop-blur-md border-b border-[#24262E] px-4 py-3">
+        <div className="flex items-center justify-between mb-3">
           <button
-            onClick={currentStep === 1 ? onBack : () => setCurrentStep((s) => s - 1)}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 4,
-              color: "#111827",
-              display: "flex",
-              alignItems: "center",
-            }}
+            onClick={onBack}
+            className="flex items-center gap-1.5 text-xs font-semibold text-[#8E929E] hover:text-[#FFFFFF] cursor-pointer"
           >
-            <ChevronLeft size={22} />
+            <ChevronLeft size={18} /> Cancel
           </button>
-          <span style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
-            {STEP_TITLES[currentStep - 1]}
-          </span>
-          <span style={{ fontSize: 13, color: "#98A2B3" }}>
-            {currentStep < 5 ? `${currentStep} of 5` : ""}
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleAiAutoConfig}
+              disabled={isOptimizingWithAI}
+              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-gradient-to-r from-[#FF7A00] to-[#FF4500] text-white hover:brightness-110 shadow-md shadow-[#FF7A00]/25 transition-all cursor-pointer disabled:opacity-50"
+            >
+              {isOptimizingWithAI ? (
+                <RefreshCw size={13} className="animate-spin" />
+              ) : (
+                <Sparkles size={13} />
+              )}
+              <span>Auto-Tune with Gemini</span>
+            </button>
+            <span className="text-xs font-bold text-[#FF7A00] hidden sm:inline">
+              Step {currentStep} of {STEP_TITLES.length}: {STEP_TITLES[currentStep - 1]}
+            </span>
+          </div>
         </div>
-        {/* Step progress segments */}
-        <div style={{ display: "flex", gap: 3, paddingBottom: 0, marginBottom: 0 }}>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                flex: 1,
-                height: 4,
-                background: i < currentStep ? "#8B5CF6" : "#F1F4F9",
-                transition: "background 0.3s",
-              }}
-            />
-          ))}
+
+        {aiReasoning && (
+          <div className="mt-2 mb-1 px-3 py-1.5 rounded-xl bg-[#FF7A00]/10 border border-[#FF7A00]/30 flex items-center justify-between text-xs text-[#E5E7EB]">
+            <div className="flex items-center gap-2">
+              <Bot size={14} className="text-[#FF7A00]" />
+              <span>
+                <strong>Gemini Recommendation:</strong> {aiReasoning}
+              </span>
+            </div>
+            <button
+              onClick={() => setAiReasoning(null)}
+              className="text-[#8E929E] hover:text-white ml-2"
+            >
+              <X size={12} />
+            </button>
+          </div>
+        )}
+
+        {/* Step Progress Line */}
+        <div className="grid grid-cols-5 gap-1.5">
+          {STEP_TITLES.map((title, i) => {
+            const stepNum = i + 1;
+            const isDone = currentStep > stepNum;
+            const isCurrent = currentStep === stepNum;
+            return (
+              <div key={title} className="flex flex-col gap-1">
+                <div
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    isDone
+                      ? "bg-gradient-to-r from-[#FF7A00] to-[#FF5500]"
+                      : isCurrent
+                      ? "bg-[#FF7A00] shadow-[0_0_8px_rgba(255,122,0,0.6)]"
+                      : "bg-[#24262E]"
+                  }`}
+                />
+                <span className={`text-[10px] truncate hidden md:inline ${
+                  isCurrent ? "text-[#FF7A00] font-bold" : "text-[#8E929E]"
+                }`}>
+                  {title}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Step content */}
-      <div style={{ flex: 1, overflowY: "auto", paddingBottom: currentStep === 5 ? 32 : 96 }}>
-        {/* STEP 1 — Upload */}
+      <div className="max-w-2xl mx-auto w-full px-4 pt-6 flex-1">
+        {/* STEP 1: UPLOAD */}
         {currentStep === 1 && (
-          <div style={{ padding: "24px 16px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="space-y-4 animate-in fade-in duration-200">
             <div>
-              <div style={{ fontSize: 18, fontWeight: 600, color: "#111827" }}>Choose File</div>
-              <div style={{ fontSize: 13, color: "#98A2B3", marginTop: 4 }}>
-                Select files to process
-              </div>
+              <h2 className="text-base font-bold text-[#FFFFFF]">Select Input Data or Binaries</h2>
+              <p className="text-xs text-[#8E929E] mt-0.5">
+                Drop datasets, raw video streams, or scripts to distribute across cluster memory.
+              </p>
             </div>
 
-            {/* Drop zone */}
             <div
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setIsDragging(false);
-                const names = Array.from(e.dataTransfer.files).map((f) => f.name);
-                setSelectedFiles((prev) => [...prev, ...names]);
-              }}
-              style={{
-                background: isDragging ? "#F3E8FF" : "#F7F9FC",
-                border: `2px dashed ${isDragging ? "#8B5CF6" : "#E6EAF0"}`,
-                borderRadius: 16,
-                padding: "40px 24px",
-                textAlign: "center",
-                transition: "all 0.2s",
-                cursor: "pointer",
-              }}
-              onClick={() => setSelectedFiles((prev) => [...prev, `file-${Date.now()}.mp4`])}
+              onDrop={handleFileDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
+                isDragging
+                  ? "border-[#FF7A00] bg-[#FF7A00]/10"
+                  : "border-[#282A32] bg-[#14151B] hover:border-[#FF7A00]/60 hover:bg-[#18191E]"
+              }`}
             >
-              <UploadCloud size={48} color="#8B5CF6" style={{ margin: "0 auto 12px" }} />
-              <div style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
-                Tap to choose file
-              </div>
-              <div style={{ fontSize: 13, color: "#98A2B3", marginTop: 4 }}>
-                or drag & drop here
-              </div>
+              <UploadCloud size={36} className="mx-auto text-[#FF7A00] mb-3" />
+              <p className="text-sm font-semibold text-[#FFFFFF]">
+                Click or drag files here to upload
+              </p>
+              <p className="text-xs text-[#8E929E] mt-1">
+                Supports video (.mp4, .mkv), archives (.zip, .tar), models (.pt, .onnx), code (.py)
+              </p>
             </div>
 
-            {/* File type cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              {FILE_TYPE_CARDS.map((ft) => (
-                <div
-                  key={ft.label}
-                  className="card-sm"
-                  onClick={() => setSelectedFileType(ft.label)}
-                  style={{
-                    padding: 16,
-                    textAlign: "center",
-                    cursor: "pointer",
-                    border: selectedFileType === ft.label
-                      ? "2px solid #8B5CF6"
-                      : "1px solid #E6EAF0",
-                    background: selectedFileType === ft.label ? "#F3E8FF" : "#FFFFFF",
-                  }}
-                >
-                  <div style={{ fontSize: 28 }}>{ft.emoji}</div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginTop: 6 }}>
-                    {ft.label}
-                  </div>
-                  <div style={{ fontSize: 11, color: "#98A2B3", marginTop: 2 }}>
-                    {ft.ext}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Source buttons */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {SOURCE_BUTTONS.map((src) => (
-                <button
-                  key={src}
-                  style={{
-                    height: 44,
-                    background: "#F1F4F9",
-                    border: "none",
-                    borderRadius: 12,
-                    fontSize: 14,
-                    fontWeight: 500,
-                    color: "#111827",
-                    cursor: "pointer",
-                  }}
-                >
-                  {src}
-                </button>
-              ))}
-            </div>
-
-            {/* File chips */}
             {selectedFiles.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {selectedFiles.map((f, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      background: "#F3E8FF",
-                      color: "#8B5CF6",
-                      fontSize: 12,
-                      fontWeight: 500,
-                      borderRadius: 99,
-                      padding: "4px 10px",
-                    }}
+              <div className="bg-[#14151B] border border-[#24262E] rounded-xl p-3.5 space-y-2">
+                <div className="flex items-center justify-between text-xs font-semibold text-[#8E929E]">
+                  <span>Queued Payloads ({selectedFiles.length})</span>
+                  <button
+                    onClick={() => setSelectedFiles([])}
+                    className="text-[#FF7A00] hover:underline"
                   >
-                    {f}
-                  </span>
+                    Clear All
+                  </button>
+                </div>
+                {selectedFiles.map((f, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between bg-[#0B0C0E] border border-[#20222A] rounded-lg px-3 py-2 text-xs"
+                  >
+                    <span className="font-mono text-[#FFFFFF] truncate max-w-[260px]">{f}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedFiles((prev) => prev.filter((_, idx) => idx !== i));
+                      }}
+                      className="text-[#8E929E] hover:text-red-400"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
           </div>
         )}
 
-        {/* STEP 2 — Configure */}
+        {/* STEP 2: CONFIGURE */}
         {currentStep === 2 && (
-          <div style={{ padding: "24px 16px", display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="space-y-4 animate-in fade-in duration-200">
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: "#667085", display: "block", marginBottom: 6 }}>
-                Task Name
-              </label>
-              <input
-                className="input-field"
-                style={{ height: 44, paddingLeft: 16, paddingRight: 16 }}
-                placeholder="e.g. 4K Video Transcoding — Episode 12"
-                value={taskName}
-                onChange={(e) => setTaskName(e.target.value)}
-              />
+              <h2 className="text-base font-bold text-[#FFFFFF]">Task Parameters</h2>
+              <p className="text-xs text-[#8E929E] mt-0.5">
+                Configure job priority and chunk splitting policy.
+              </p>
             </div>
 
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: "#667085", display: "block", marginBottom: 8 }}>
-                Task Type
-              </label>
-              <div style={{ display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", paddingBottom: 4 }}>
-                {TYPE_PILLS.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setTaskType(t)}
-                    style={{
-                      flexShrink: 0,
-                      padding: "7px 14px",
-                      borderRadius: 99,
-                      border: taskType === t ? "1.5px solid #8B5CF6" : "1.5px solid #E6EAF0",
-                      background: taskType === t ? "#F3E8FF" : "#FFFFFF",
-                      color: taskType === t ? "#8B5CF6" : "#667085",
-                      fontSize: 13,
-                      fontWeight: 500,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {t}
-                  </button>
-                ))}
+            <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-[#8E929E] block mb-1.5">
+                  Job Name
+                </label>
+                <input
+                  value={taskName}
+                  onChange={(e) => setTaskName(e.target.value)}
+                  placeholder="e.g. 4K Video Transcoding Batch"
+                  className="w-full h-10 bg-[#0B0C0E] border border-[#282A32] rounded-xl px-3 text-sm text-[#FFFFFF] focus:outline-none focus:border-[#FF7A00]"
+                />
               </div>
-            </div>
 
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: "#667085", display: "block", marginBottom: 8 }}>
-                Priority
-              </label>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {PRIORITY_OPTIONS.map((p) => (
-                  <button
-                    key={p.key}
-                    onClick={() => setPriority(p.key)}
-                    style={{
-                      padding: "7px 14px",
-                      borderRadius: 99,
-                      border: priority === p.key ? `1.5px solid ${p.color}` : "1.5px solid #E6EAF0",
-                      background: priority === p.key ? p.bg : "#FFFFFF",
-                      color: priority === p.key ? p.color : "#667085",
-                      fontSize: 13,
-                      fontWeight: 500,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {p.label}
-                  </button>
-                ))}
+              <div>
+                <label className="text-xs font-semibold text-[#8E929E] block mb-1.5">
+                  Workload Engine Preset
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {TYPE_PILLS.map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setTaskType(type)}
+                      className={`px-3 py-2 rounded-xl text-xs font-medium text-left transition-all ${
+                        taskType === type
+                          ? "bg-gradient-to-r from-[#FF7A00] to-[#FF5500] text-white shadow-sm"
+                          : "bg-[#0B0C0E] border border-[#282A32] text-[#8E929E] hover:text-white"
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: "#667085", display: "block", marginBottom: 6 }}>
-                Split Size
-              </label>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
+              <div>
+                <label className="text-xs font-semibold text-[#8E929E] block mb-1.5">
+                  Execution Priority
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {PRIORITY_OPTIONS.map((p) => (
+                    <button
+                      key={p.key}
+                      onClick={() => setPriority(p.key as any)}
+                      className={`py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${
+                        priority === p.key
+                          ? "border border-[#FF7A00] text-[#FF7A00] bg-[#FF7A00]/15"
+                          : "bg-[#0B0C0E] border border-[#282A32] text-[#8E929E]"
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <span className="font-semibold text-[#8E929E]">Chunk Partition Size</span>
+                  <span className="font-mono text-[#FF7A00] font-bold">{splitSize} MB per Chunk</span>
+                </div>
                 <input
                   type="range"
-                  min={1}
-                  max={50}
+                  min="50"
+                  max="1000"
+                  step="25"
                   value={splitSize}
                   onChange={(e) => setSplitSize(Number(e.target.value))}
-                  style={{ flex: 1, accentColor: "#8B5CF6" }}
+                  className="w-full accent-[#FF7A00] cursor-pointer"
                 />
-                <span style={{ fontSize: 13, color: "#111827", fontWeight: 600, minWidth: 28, textAlign: "right" }}>
-                  {splitSize}
-                </span>
               </div>
-              <div style={{ fontSize: 12, color: "#98A2B3" }}>
-                {totalChunks} chunks · ~{chunkSizeMB} MB each
-              </div>
-            </div>
 
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: "#667085", display: "block", marginBottom: 6 }}>
-                Description
-              </label>
-              <textarea
-                className="input-field"
-                rows={3}
-                placeholder="Optional task description…"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                style={{ resize: "none", paddingLeft: 12, paddingTop: 10, paddingRight: 12, paddingBottom: 10, lineHeight: 1.5 }}
-              />
+              <div>
+                <label className="text-xs font-semibold text-[#8E929E] block mb-1.5">
+                  Task Execution Notes
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={2}
+                  className="w-full bg-[#0B0C0E] border border-[#282A32] rounded-xl p-3 text-xs text-[#FFFFFF] focus:outline-none focus:border-[#FF7A00]"
+                />
+              </div>
             </div>
           </div>
         )}
 
-        {/* STEP 3 — Workers */}
+        {/* STEP 3: WORKERS */}
         {currentStep === 3 && (
-          <div style={{ padding: "24px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ fontSize: 18, fontWeight: 600, color: "#111827" }}>Select Workers</div>
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-[#FFFFFF]">Select Compute Nodes</h2>
+                <p className="text-xs text-[#8E929E] mt-0.5">
+                  Choose which LAN devices will participate in the workload mesh.
+                </p>
+              </div>
               <button
-                onClick={() => setSelectedWorkers(WORKER_OPTIONS.filter((w) => w.online).map((w) => w.id))}
-                style={{
-                  background: "#F3E8FF",
-                  color: "#8B5CF6",
-                  border: "none",
-                  borderRadius: 8,
-                  padding: "6px 12px",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  cursor: "pointer",
-                }}
+                onClick={handleSelectAllWorkers}
+                className="text-xs text-[#FF7A00] hover:underline font-semibold"
               >
-                Auto Select
+                {selectedWorkers.length === WORKER_OPTIONS.length ? "Deselect All" : "Select All"}
               </button>
             </div>
 
-            {WORKER_OPTIONS.map((w) => {
-              const selected = selectedWorkers.includes(w.id);
-              return (
-                <div
-                  key={w.id}
-                  className="card-sm"
-                  onClick={() => toggleWorker(w.id)}
-                  style={{
-                    padding: 12,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    cursor: "pointer",
-                    border: selected ? `1.5px solid #8B5CF6` : "1px solid #E6EAF0",
-                    background: selected ? "#F3E8FF08" : "#FFFFFF",
-                    opacity: w.online ? 1 : 0.5,
-                  }}
-                >
+            <div className="space-y-2.5">
+              {WORKER_OPTIONS.map((node) => {
+                const isSelected = selectedWorkers.includes(node.id);
+                return (
                   <div
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: "50%",
-                      background: w.color,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#fff",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      flexShrink: 0,
-                    }}
+                    key={node.id}
+                    onClick={() => toggleWorker(node.id)}
+                    className={`bg-[#14151B] border rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all ${
+                      isSelected
+                        ? "border-[#FF7A00] shadow-[0_0_12px_rgba(255,122,0,0.15)] bg-[#18191E]"
+                        : "border-[#24262E] opacity-70 hover:opacity-100"
+                    }`}
                   >
-                    {w.name[0]}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: "#111827" }}>
-                      {w.name}
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-colors ${
+                          isSelected
+                            ? "bg-[#FF7A00] border-[#FF7A00] text-black"
+                            : "border-[#282A32] bg-[#0B0C0E]"
+                        }`}
+                      >
+                        {isSelected && <Check size={14} className="stroke-[3]" />}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-[#FFFFFF]">{node.name}</p>
+                        <p className="text-[11px] text-[#8E929E]">{node.role}</p>
+                      </div>
                     </div>
-                    <div style={{ fontSize: 12, color: "#98A2B3", marginTop: 2 }}>
-                      CPU {w.cpu}% · RAM {w.ram}%
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      background: w.online ? "#10B981" : "#98A2B3",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <div
-                    style={{
-                      width: 20,
-                      height: 20,
-                      borderRadius: 5,
-                      border: selected ? "none" : "1.5px solid #E6EAF0",
-                      background: selected ? "#8B5CF6" : "#FFFFFF",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {selected && <Check size={12} color="#fff" strokeWidth={3} />}
-                  </div>
-                </div>
-              );
-            })}
 
-            <div
-              style={{
-                fontSize: 13,
-                color: "#667085",
-                textAlign: "center",
-                marginTop: 4,
-              }}
-            >
-              {selectedWorkers.length} of {WORKER_OPTIONS.length} workers selected
+                    <div className="flex items-center gap-4 text-xs font-mono">
+                      <div>
+                        <span className="text-[10px] text-[#8E929E] block">CPU</span>
+                        <span className="text-[#FF7A00] font-bold">{node.cpu}%</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-[#8E929E] block">RAM</span>
+                        <span className="text-[#E5E7EB] font-bold">{node.ram}%</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* STEP 4 — Review */}
+        {/* STEP 4: REVIEW & DISPATCH */}
         {currentStep === 4 && (
-          <div style={{ padding: "24px 16px", display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ fontSize: 18, fontWeight: 600, color: "#111827" }}>Review</div>
-            <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-              {[
-                {
-                  section: "File",
-                  value: selectedFiles.length > 0 ? selectedFiles[0] : "No file selected",
-                  step: 1,
-                },
-                { section: "Task Name", value: taskName || "(untitled)", step: 2 },
-                { section: "Type", value: taskType, step: 2 },
-                {
-                  section: "Priority",
-                  value: PRIORITY_OPTIONS.find((p) => p.key === priority)?.label ?? priority,
-                  step: 2,
-                },
-                { section: "Split Size", value: `${splitSize} chunks · ~${chunkSizeMB} MB each`, step: 2 },
-                {
-                  section: "Workers",
-                  value: `${selectedWorkers.length} workers selected`,
-                  step: 3,
-                },
-                {
-                  section: "Est. Time",
-                  value: "~41 min",
-                  step: undefined,
-                },
-              ].map((row, i, arr) => (
-                <div
-                  key={row.section}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "12px 16px",
-                    borderBottom: i < arr.length - 1 ? "1px solid #E6EAF0" : "none",
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 12, color: "#98A2B3" }}>{row.section}</div>
-                    <div style={{ fontSize: 14, color: "#111827", fontWeight: 500, marginTop: 2 }}>
-                      {row.value}
-                    </div>
-                  </div>
-                  {row.step !== undefined && (
-                    <button
-                      onClick={() => setCurrentStep(row.step!)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#8B5CF6",
-                        fontSize: 13,
-                        fontWeight: 500,
-                        cursor: "pointer",
-                      }}
-                    >
-                      Edit
-                    </button>
-                  )}
-                </div>
-              ))}
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div>
+              <h2 className="text-base font-bold text-[#FFFFFF]">Review & Confirm Dispatch</h2>
+              <p className="text-xs text-[#8E929E] mt-0.5">
+                Verify cluster allocation details before broadcasting job instructions.
+              </p>
+            </div>
+
+            <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 space-y-3.5">
+              <div className="flex justify-between items-center pb-3 border-b border-[#24262E]">
+                <span className="text-xs text-[#8E929E]">Task Name</span>
+                <span className="text-xs font-bold text-[#FFFFFF]">{taskName}</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-[#24262E]">
+                <span className="text-xs text-[#8E929E]">Engine</span>
+                <span className="text-xs font-bold text-[#FF7A00]">{taskType}</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-[#24262E]">
+                <span className="text-xs text-[#8E929E]">Priority Level</span>
+                <span className="text-xs font-bold uppercase text-[#FF7A00]">{priority}</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-[#24262E]">
+                <span className="text-xs text-[#8E929E]">Payloads Queued</span>
+                <span className="text-xs font-mono text-[#FFFFFF]">{selectedFiles.length} file(s)</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-[#24262E]">
+                <span className="text-xs text-[#8E929E]">Worker Allocation</span>
+                <span className="text-xs font-bold text-emerald-400">{selectedWorkers.length} nodes assigned</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-[#8E929E]">Chunk Granularity</span>
+                <span className="text-xs font-mono text-[#E5E7EB]">{splitSize} MB chunks</span>
+              </div>
             </div>
           </div>
         )}
 
-        {/* STEP 5 — Success */}
+        {/* STEP 5: DONE */}
         {currentStep === 5 && (
-          <div
-            style={{
-              padding: "48px 24px 32px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 16,
-              textAlign: "center",
-            }}
-          >
-            <CheckCircle2 size={64} color="#10B981" />
-            <div style={{ fontSize: 22, fontWeight: 700, color: "#111827" }}>
-              Task Submitted!
+          <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-10 text-center space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 rounded-full bg-[#FF7A00]/15 border border-[#FF7A00]/40 mx-auto flex items-center justify-center text-[#FF7A00] shadow-[0_0_24px_rgba(255,122,0,0.4)]">
+              <CheckCircle2 size={36} />
             </div>
-            <div
-              className="mono"
-              style={{
-                fontSize: 14,
-                color: "#667085",
-                background: "#F1F4F9",
-                padding: "6px 16px",
-                borderRadius: 8,
-              }}
-            >
-              {submittedId}
-            </div>
-            <div style={{ fontSize: 13, color: "#98A2B3" }}>
-              Estimated runtime: ~41 min
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", marginTop: 16 }}>
-              <button
-                className="btn-primary"
-                style={{ height: 48, width: "100%" }}
-                onClick={() => onSubmitted(submittedId)}
-              >
-                View Task
-              </button>
-              <button
-                className="btn-secondary"
-                style={{ height: 48, width: "100%" }}
-                onClick={() => {
-                  setCurrentStep(1);
-                  setSelectedFiles([]);
-                  setTaskName("");
-                  setSelectedWorkers(["w1", "w2", "w3"]);
-                }}
-              >
-                Create Another
-              </button>
-            </div>
+            <h2 className="text-lg font-bold text-[#FFFFFF]">Task Successfully Dispatched!</h2>
+            <p className="text-xs text-[#8E929E] max-w-sm mx-auto">
+              Broadcasted task <span className="text-[#FF7A00] font-mono">{submittedId}</span> to {selectedWorkers.length} worker nodes. Opening live inspector...
+            </p>
           </div>
         )}
       </div>
 
-      {/* Bottom Next / Submit button */}
+      {/* Bottom Sticky Action Footer */}
       {currentStep < 5 && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            padding: "12px 16px 24px",
-            background: "#FFFFFF",
-            borderTop: "1px solid #E6EAF0",
-            zIndex: 20,
-          }}
-        >
+        <div className="sticky bottom-0 bg-[#111217]/95 backdrop-blur-md border-t border-[#24262E] px-4 py-3 flex items-center justify-between">
           <button
-            className="btn-primary"
-            style={{ height: 48, width: "100%" }}
-            onClick={handleNext}
+            onClick={() => currentStep > 1 && setCurrentStep((s) => s - 1)}
+            disabled={currentStep === 1}
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+              currentStep === 1
+                ? "opacity-30 text-[#8E929E] cursor-not-allowed"
+                : "bg-[#18191E] border border-[#282A32] text-white hover:bg-[#20222A]"
+            }`}
           >
-            {currentStep === 4 ? "Submit Task" : "Next"}
+            Back
+          </button>
+
+          <button
+            onClick={handleNext}
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#FF7A00] to-[#FF5500] text-xs font-semibold text-white shadow-[0_2px_12px_rgba(255,122,0,0.35)] hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            {currentStep === 4 ? "Dispatch Workload" : "Continue"}
+            <ArrowRight size={14} />
           </button>
         </div>
       )}

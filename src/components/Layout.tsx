@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
-  Grid2x2,
   LayoutDashboard,
   Monitor,
   ListTodo,
@@ -15,6 +14,7 @@ import {
   Bell,
 } from "lucide-react";
 import BottomNav from "./BottomNav";
+import GeminiAgentWidget from "./GeminiAgentWidget";
 
 const NAV_LINKS = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -43,16 +43,62 @@ const PAGE_TITLES: Record<string, string> = {
 
 interface LayoutProps {
   children: React.ReactNode;
+  currentUser?: { fullName?: string; email?: string; avatar?: string };
+  onLogout?: () => void;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, currentUser }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const [globalSearch, setGlobalSearch] = useState("");
   const pageTitle = PAGE_TITLES[location.pathname] ?? "Dashboard";
 
+  const [unreadCount, setUnreadCount] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem("ocg_notifications");
+      if (saved) {
+        const notifs = JSON.parse(saved);
+        if (Array.isArray(notifs)) return notifs.filter((n: any) => !n.read).length;
+      }
+    } catch {}
+    return 4;
+  });
+
+  useEffect(() => {
+    const handleUpdate = (e: any) => {
+      if (typeof e.detail?.unread === "number") {
+        setUnreadCount(e.detail.unread);
+      } else {
+        try {
+          const saved = localStorage.getItem("ocg_notifications");
+          if (saved) {
+            const notifs = JSON.parse(saved);
+            if (Array.isArray(notifs)) setUnreadCount(notifs.filter((n: any) => !n.read).length);
+          }
+        } catch {}
+      }
+    };
+
+    window.addEventListener("ocg_notifications_updated", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("ocg_notifications_updated", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
+  }, []);
+
+  const initials = currentUser?.avatar || "RR";
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (globalSearch.trim()) {
+      navigate(`/tasks?q=${encodeURIComponent(globalSearch.trim())}`);
+    }
+  };
+
   return (
-    <div style={{ background: "#F7F9FC", minHeight: "100vh" }}>
-      {/* Desktop Sidebar */}
+    <div style={{ background: "#0B0C0E", minHeight: "100vh", color: "#FFFFFF" }}>
+      {/* Desktop Sidebar matching Image 1 */}
       <aside
         className="hidden lg:flex"
         style={{
@@ -61,28 +107,49 @@ export default function Layout({ children }: LayoutProps) {
           left: 0,
           bottom: 0,
           width: 240,
-          background: "#FFFFFF",
-          borderRight: "1px solid #E6EAF0",
+          background: "#0D0E12",
+          borderRight: "1px solid #24262E",
           flexDirection: "column",
           zIndex: 40,
         }}
       >
-        {/* Logo */}
+        {/* Brand Header */}
         <div
+          onClick={() => navigate("/")}
           style={{
-            padding: "20px",
+            padding: "20px 18px",
             display: "flex",
             alignItems: "center",
-            gap: 10,
+            gap: 12,
+            cursor: "pointer",
           }}
         >
-          <Grid2x2 size={28} style={{ color: "#8B5CF6", flexShrink: 0 }} />
+          <div
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 10,
+              backgroundColor: "rgba(255, 122, 0, 0.15)",
+              border: "1px solid rgba(255, 122, 0, 0.35)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+            </svg>
+          </div>
           <span
             style={{
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: 700,
-              color: "#111827",
-              lineHeight: 1.2,
+              color: "#FFFFFF",
+              letterSpacing: "-0.2px",
             }}
           >
             Offline Compute Grid
@@ -93,10 +160,10 @@ export default function Layout({ children }: LayoutProps) {
         <nav
           style={{
             flex: 1,
-            padding: "8px 12px",
+            padding: "10px 12px",
             display: "flex",
             flexDirection: "column",
-            gap: 2,
+            gap: 4,
           }}
         >
           {NAV_LINKS.map(({ to, label, icon: Icon }) => (
@@ -107,17 +174,19 @@ export default function Layout({ children }: LayoutProps) {
               style={({ isActive }) => ({
                 display: "flex",
                 alignItems: "center",
-                height: 40,
-                paddingLeft: 12,
-                paddingRight: 12,
-                gap: 10,
-                borderRadius: 8,
+                height: 44,
+                paddingLeft: 14,
+                paddingRight: 14,
+                gap: 12,
+                borderRadius: 12,
                 textDecoration: "none",
                 fontSize: 14,
-                fontWeight: 500,
-                background: isActive ? "#F3E8FF" : "transparent",
-                color: isActive ? "#8B5CF6" : "#667085",
-                transition: "background 0.15s",
+                fontWeight: isActive ? 600 : 500,
+                background: isActive ? "rgba(255, 122, 0, 0.12)" : "transparent",
+                border: isActive ? "1px solid rgba(255, 122, 0, 0.4)" : "1px solid transparent",
+                color: isActive ? "#FF7A00" : "#8E929E",
+                boxShadow: isActive ? "0 0 16px rgba(255, 122, 0, 0.15)" : "none",
+                transition: "all 0.15s ease",
               })}
             >
               {({ isActive }: { isActive: boolean }) => (
@@ -125,7 +194,7 @@ export default function Layout({ children }: LayoutProps) {
                   <Icon
                     size={18}
                     style={{
-                      color: isActive ? "#8B5CF6" : "#98A2B3",
+                      color: isActive ? "#FF7A00" : "#8E929E",
                       flexShrink: 0,
                     }}
                   />
@@ -136,145 +205,161 @@ export default function Layout({ children }: LayoutProps) {
           ))}
         </nav>
 
-        {/* Bottom status */}
+        {/* Bottom status matching Image 1 exact text */}
         <div
           style={{
             marginTop: "auto",
-            padding: 16,
-            borderTop: "1px solid #E6EAF0",
+            padding: "16px 18px",
+            borderTop: "1px solid #24262E",
             display: "flex",
             flexDirection: "column",
-            gap: 4,
+            gap: 3,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
             <span
               style={{
                 width: 8,
                 height: 8,
                 borderRadius: "50%",
-                background: "#10B981",
+                background: "#FF7A00",
+                boxShadow: "0 0 8px #FF7A00",
                 flexShrink: 0,
               }}
             />
-            <span style={{ fontSize: 12, color: "#10B981", fontWeight: 500 }}>
-              LAN Connected
+            <span style={{ fontSize: 12, color: "#FF7A00", fontWeight: 600 }}>
+              LAN Grid Active
             </span>
           </div>
-          <span style={{ fontSize: 12, color: "#98A2B3" }}>v1.0.0</span>
+          <span style={{ fontSize: 11, color: "#64748B" }}>
+            v1.0.0 • Solar Engine
+          </span>
         </div>
       </aside>
 
-      {/* Top Header */}
+      {/* Top Header matching Image 1 */}
       <header
         className="fixed top-0 right-0 left-0 lg:left-[240px]"
         style={{
-          background: "#FFFFFF",
-          borderBottom: "1px solid #E6EAF0",
-          boxShadow: "0 1px 0 #E6EAF0",
+          background: "#0D0E12",
+          borderBottom: "1px solid #24262E",
           zIndex: 30,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          height: 48,
+          height: 56,
+          paddingLeft: 24,
+          paddingRight: 24,
         }}
       >
-        {/* Desktop adjustments via class */}
-        <div
-          className="hidden lg:flex items-center px-6"
-          style={{ height: 56 }}
-        >
-          <span style={{ fontSize: 17, fontWeight: 600, color: "#111827" }}>
+        {/* Page Title */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="flex lg:hidden items-center gap-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+            </svg>
+          </div>
+          <span style={{ fontSize: 18, fontWeight: 700, color: "#FFFFFF" }}>
             {pageTitle}
           </span>
         </div>
 
-        {/* Mobile left: logo */}
-        <div className="flex lg:hidden items-center px-4 gap-2">
-          <Grid2x2 size={20} style={{ color: "#8B5CF6" }} />
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
-            Offline Compute Grid
-          </span>
-        </div>
-
-        {/* Desktop right */}
-        <div className="hidden lg:flex items-center gap-3 px-6">
-          <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+        {/* Right Header items matching Image 1 */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {/* Search cluster... input */}
+          <form onSubmit={handleSearchSubmit} style={{ position: "relative" }}>
             <Search
-              size={16}
+              size={15}
               style={{
-                color: "#98A2B3",
+                color: "#64748B",
                 position: "absolute",
                 left: 12,
+                top: "50%",
+                transform: "translateY(-50%)",
                 pointerEvents: "none",
               }}
             />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search cluster..."
+              value={globalSearch}
+              onChange={(e) => setGlobalSearch(e.target.value)}
               style={{
                 height: 36,
-                width: 208,
-                borderRadius: 999,
-                background: "#F1F4F9",
-                border: "none",
+                width: 220,
+                borderRadius: 10,
+                background: "#18191E",
+                border: "1px solid #282A32",
                 outline: "none",
-                paddingLeft: 36,
+                paddingLeft: 34,
                 paddingRight: 12,
                 fontSize: 13,
-                color: "#111827",
+                color: "#FFFFFF",
+                fontFamily: "inherit",
               }}
             />
-          </div>
+          </form>
 
+          {/* Notifications Icon with dynamic unread count */}
           <button
             onClick={() => navigate("/notifications")}
             aria-label="View notifications"
+            className="hover:border-[#FF7A00] transition-colors"
             style={{
               position: "relative",
-              background: "none",
-              border: "none",
+              background: "#18191E",
+              border: "1px solid #282A32",
               cursor: "pointer",
-              padding: 6,
-              borderRadius: 8,
+              width: 36,
+              height: 36,
+              borderRadius: 10,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Bell size={20} style={{ color: "#667085" }} />
-            <span
-              style={{
-                position: "absolute",
-                top: 2,
-                right: 2,
-                width: 16,
-                height: 16,
-                background: "#EF4444",
-                borderRadius: "50%",
-                fontSize: 10,
-                fontWeight: 700,
-                color: "#FFFFFF",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                lineHeight: 1,
-              }}
-            >
-              3
-            </span>
+            <Bell size={17} style={{ color: "#CBD5E1" }} />
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: -3,
+                  right: -3,
+                  minWidth: 16,
+                  height: 16,
+                  background: "#FF7A00",
+                  boxShadow: "0 0 8px rgba(255, 122, 0, 0.6)",
+                  borderRadius: "50%",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: "#FFFFFF",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  lineHeight: 1,
+                  padding: "0 4px",
+                }}
+              >
+                {unreadCount}
+              </span>
+            )}
           </button>
 
+          {/* User Avatar Circle with RR matching Image 1 */}
           <div
             onClick={() => navigate("/profile")}
             role="button"
             tabIndex={0}
-            aria-label="View profile"
+            title={currentUser?.fullName || "User Profile"}
             style={{
               width: 36,
               height: 36,
               borderRadius: "50%",
-              background: "linear-gradient(135deg, #8B5CF6, #7C5CFC)",
+              background: "linear-gradient(135deg, #FF7A00 0%, #FF5500 100%)",
+              boxShadow: "0 2px 10px rgba(255, 122, 0, 0.35)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -285,115 +370,23 @@ export default function Layout({ children }: LayoutProps) {
               flexShrink: 0,
             }}
           >
-            AK
-          </div>
-        </div>
-
-        {/* Mobile right */}
-        <div className="flex lg:hidden items-center gap-1 px-4">
-          <button
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 6,
-              borderRadius: 8,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Search size={18} style={{ color: "#667085" }} />
-          </button>
-
-          <button
-            onClick={() => navigate("/notifications")}
-            aria-label="View notifications"
-            style={{
-              position: "relative",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 6,
-              borderRadius: 8,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Bell size={18} style={{ color: "#667085" }} />
-            <span
-              style={{
-                position: "absolute",
-                top: 2,
-                right: 2,
-                width: 14,
-                height: 14,
-                background: "#EF4444",
-                borderRadius: "50%",
-                fontSize: 9,
-                fontWeight: 700,
-                color: "#FFFFFF",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                lineHeight: 1,
-              }}
-            >
-              3
-            </span>
-          </button>
-
-          <div
-            onClick={() => navigate("/profile")}
-            role="button"
-            tabIndex={0}
-            aria-label="View profile"
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #8B5CF6, #7C5CFC)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 11,
-              fontWeight: 700,
-              color: "#FFFFFF",
-              cursor: "pointer",
-              flexShrink: 0,
-            }}
-          >
-            AK
+            {initials}
           </div>
         </div>
       </header>
 
-      {/* Spacer for fixed header height on desktop */}
-      <div className="hidden lg:block" style={{ height: 56 }} />
-
-      {/* Main Content */}
+      {/* Main Content Area */}
       <main
-        className="lg:ml-[240px]"
-        style={{
-          marginTop: 48,
-          background: "#F7F9FC",
-          minHeight: "100vh",
-        }}
+        className="pt-[56px] lg:pl-[240px] pb-16 lg:pb-0"
+        style={{ minHeight: "100vh", backgroundColor: "#0B0C0E" }}
       >
-        {/* Desktop adjusts marginTop via class override */}
-        <style>{`@media (min-width: 1024px) { main.ocg-main { margin-top: 56px !important; } }`}</style>
-        <div
-          className="ocg-main lg:p-6 p-4"
-          style={{
-            paddingBottom: "calc(64px + env(safe-area-inset-bottom))",
-          }}
-        >
-          {children}
-        </div>
+        {children}
       </main>
 
-      {/* Bottom Nav (mobile only) */}
+      {/* Global Gemini AI Agent Copilot Widget */}
+      <GeminiAgentWidget />
+
+      {/* Mobile Bottom Nav */}
       <BottomNav />
     </div>
   );

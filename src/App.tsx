@@ -24,12 +24,30 @@ import ErrorPage from './pages/ErrorPage'
 type AuthScreen = 'splash' | 'login' | 'forgot' | 'create' | 'verify'
 
 export default function App() {
-  const [authScreen, setAuthScreen] = useState<AuthScreen>('splash')
-  const [loggedIn, setLoggedIn] = useState(false)
+  const [authScreen, setAuthScreen] = useState<AuthScreen>('login')
+  const [currentUser, setCurrentUser] = useState<any>(() => {
+    const saved = localStorage.getItem("ocg_user");
+    if (saved) {
+      try { return JSON.parse(saved); } catch {}
+    }
+    return { fullName: "REVANTH R", email: "revanth.r.07.ac@gmail.com", avatar: "RR" };
+  })
+  const [loggedIn, setLoggedIn] = useState(true)
   const [pendingEmail, setPendingEmail] = useState('')
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null)
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [showCreateTask, setShowCreateTask] = useState(false)
+
+  const handleLogout = () => {
+    localStorage.removeItem("ocg_user");
+    setLoggedIn(false);
+    setAuthScreen('login');
+  };
+
+  const handleLoginSuccess = (user?: any) => {
+    if (user) setCurrentUser(user);
+    setLoggedIn(true);
+  };
 
   if (!loggedIn) {
     if (authScreen === 'splash') {
@@ -38,7 +56,7 @@ export default function App() {
     if (authScreen === 'login') {
       return (
         <AuthLoginPage
-          onLogin={() => setLoggedIn(true)}
+          onLogin={handleLoginSuccess}
           onForgotPassword={() => setAuthScreen('forgot')}
           onCreateAccount={() => setAuthScreen('create')}
         />
@@ -52,7 +70,7 @@ export default function App() {
         <CreateAccountPage
           onBack={() => setAuthScreen('login')}
           onCreated={() => {
-            setPendingEmail('alex.kim@gridlab.local')
+            setPendingEmail('revanth.r.07.ac@gmail.com')
             setAuthScreen('verify')
           }}
         />
@@ -72,7 +90,7 @@ export default function App() {
   return (
     <ToastProvider>
       <BrowserRouter>
-        <Layout>
+        <Layout currentUser={currentUser} onLogout={handleLogout}>
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route
@@ -117,7 +135,16 @@ export default function App() {
             <Route path="/logs" element={<LogsPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
+            <Route
+              path="/profile"
+              element={
+                <ProfilePage
+                  currentUser={currentUser}
+                  onLogout={handleLogout}
+                  onUpdateUser={setCurrentUser}
+                />
+              }
+            />
             <Route path="*" element={<ErrorPage />} />
           </Routes>
         </Layout>

@@ -1,10 +1,11 @@
 import {
-  Search,
   AlertOctagon,
   WifiOff,
   Server,
   Wifi,
   CheckCircle2,
+  Home,
+  RotateCcw
 } from "lucide-react";
 
 type ErrorType =
@@ -20,66 +21,9 @@ interface ErrorPageProps {
   onHome?: () => void;
 }
 
-function OfflineSVG() {
-  return (
-    <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="50" cy="50" r="48" stroke="#E6EAF0" strokeWidth="2" />
-      <circle cx="50" cy="50" r="10" fill="#8B5CF6" fillOpacity="0.2" stroke="#8B5CF6" strokeWidth="1.5" strokeOpacity="0.4" />
-      <circle cx="20" cy="30" r="6" fill="#E6EAF0" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.3" />
-      <circle cx="80" cy="30" r="6" fill="#E6EAF0" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.3" />
-      <circle cx="20" cy="70" r="6" fill="#E6EAF0" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.3" />
-      <circle cx="80" cy="70" r="6" fill="#E6EAF0" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.3" />
-      <line x1="26" y1="33" x2="44" y2="45" stroke="#E6EAF0" strokeWidth="1.5" strokeDasharray="3 3" />
-      <line x1="74" y1="33" x2="56" y2="45" stroke="#E6EAF0" strokeWidth="1.5" strokeDasharray="3 3" />
-      <line x1="26" y1="67" x2="44" y2="55" stroke="#E6EAF0" strokeWidth="1.5" strokeDasharray="3 3" />
-      <line x1="74" y1="67" x2="56" y2="55" stroke="#E6EAF0" strokeWidth="1.5" strokeDasharray="3 3" />
-      <line x1="35" y1="22" x2="65" y2="22" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-      <line x1="30" y1="18" x2="70" y2="26" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" opacity="0" />
-      <line x1="38" y1="26" x2="62" y2="18" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-    </svg>
-  );
-}
-
-function FourOhFourSVG() {
-  return (
-    <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="5" y="20" width="90" height="60" rx="8" stroke="#E6EAF0" strokeWidth="2" />
-      <circle cx="25" cy="40" r="5" fill="#8B5CF6" fillOpacity="0.2" stroke="#8B5CF6" strokeWidth="1.5" strokeOpacity="0.5" />
-      <circle cx="50" cy="40" r="5" fill="#8B5CF6" fillOpacity="0.2" stroke="#8B5CF6" strokeWidth="1.5" strokeOpacity="0.5" />
-      <circle cx="75" cy="40" r="5" fill="#8B5CF6" fillOpacity="0.2" stroke="#8B5CF6" strokeWidth="1.5" strokeOpacity="0.5" />
-      <circle cx="25" cy="60" r="5" fill="#E6EAF0" />
-      <circle cx="50" cy="60" r="5" fill="#8B5CF6" fillOpacity="0.15" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.3" />
-      <circle cx="75" cy="60" r="5" fill="#E6EAF0" />
-      <line x1="25" y1="45" x2="25" y2="55" stroke="#E6EAF0" strokeWidth="1.5" />
-      <line x1="50" y1="45" x2="50" y2="55" stroke="#E6EAF0" strokeWidth="1.5" />
-      <line x1="75" y1="45" x2="75" y2="55" stroke="#E6EAF0" strokeWidth="1.5" />
-      <line x1="30" y1="40" x2="45" y2="40" stroke="#E6EAF0" strokeWidth="1.5" />
-      <line x1="55" y1="40" x2="70" y2="40" stroke="#E6EAF0" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function ServerSVG() {
-  return (
-    <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="15" y="15" width="70" height="22" rx="5" stroke="#E6EAF0" strokeWidth="2" />
-      <rect x="15" y="42" width="70" height="22" rx="5" stroke="#E6EAF0" strokeWidth="2" />
-      <rect x="15" y="69" width="70" height="16" rx="5" stroke="#E6EAF0" strokeWidth="2" />
-      <circle cx="75" cy="26" r="4" fill="#EF4444" fillOpacity="0.3" stroke="#EF4444" strokeWidth="1" strokeOpacity="0.5" />
-      <circle cx="75" cy="53" r="4" fill="#EF4444" fillOpacity="0.3" stroke="#EF4444" strokeWidth="1" strokeOpacity="0.5" />
-      <circle cx="75" cy="77" r="4" fill="#E6EAF0" />
-      <rect x="23" y="22" width="30" height="8" rx="2" fill="#8B5CF6" fillOpacity="0.1" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.2" />
-      <rect x="23" y="49" width="30" height="8" rx="2" fill="#8B5CF6" fillOpacity="0.1" stroke="#8B5CF6" strokeWidth="1" strokeOpacity="0.2" />
-    </svg>
-  );
-}
-
-const config: Record<
+const CONFIGS: Record<
   ErrorType,
   {
-    svg: React.ReactNode;
-    iconBg: string;
-    icon: React.ReactNode;
     title: string;
     description: string;
     primaryLabel: string;
@@ -87,195 +31,88 @@ const config: Record<
   }
 > = {
   "404": {
-    svg: <FourOhFourSVG />,
-    iconBg: "#F3E8FF",
-    icon: <Search size={32} color="#8B5CF6" />,
     title: "Page Not Found",
-    description:
-      "The page you are looking for does not exist or has been moved to a different location.",
-    primaryLabel: "Return Home",
+    description: "The requested route does not exist on this Offline Compute Grid controller.",
+    primaryLabel: "Return to Dashboard",
   },
   "500": {
-    svg: <ServerSVG />,
-    iconBg: "#FEF2F2",
-    icon: <AlertOctagon size={32} color="#EF4444" />,
-    title: "Something Went Wrong",
-    description:
-      "An unexpected server error occurred. Our team has been notified. Please try again shortly.",
-    primaryLabel: "Retry",
-    secondaryLabel: "Return Home",
+    title: "Cluster Execution Error",
+    description: "An unexpected exception occurred within the local scheduler engine.",
+    primaryLabel: "Retry Operation",
+    secondaryLabel: "Return to Dashboard",
   },
   offline: {
-    svg: <OfflineSVG />,
-    iconBg: "#FFF7ED",
-    icon: <WifiOff size={32} color="#F59E0B" />,
-    title: "Offline Mode",
-    description:
-      "Internet unavailable. Your local compute grid continues operating over LAN.",
-    primaryLabel: "Retry Connection",
-    secondaryLabel: "Network Scanner",
+    title: "Grid Controller Offline",
+    description: "Unable to establish handshake with local Master Node daemon on port 3001.",
+    primaryLabel: "Reconnect to Grid",
+    secondaryLabel: "Check Network Settings",
   },
   "server-offline": {
-    svg: <ServerSVG />,
-    iconBg: "#FEF2F2",
-    icon: <Server size={32} color="#EF4444" />,
-    title: "Master Node Offline",
-    description:
-      "The master node is unreachable. Check that it is powered on and connected to the same local network.",
-    primaryLabel: "Retry Connection",
-    secondaryLabel: "Network Scanner",
+    title: "Compute Core Unreachable",
+    description: "The backend telemetry service has stopped responding.",
+    primaryLabel: "Restart Service",
+    secondaryLabel: "View Local Logs",
   },
   "network-error": {
-    svg: <OfflineSVG />,
-    iconBg: "#FFF7ED",
-    icon: <Wifi size={32} color="#F59E0B" />,
-    title: "Connection Error",
-    description:
-      "Unable to reach the network. Check your connection settings and try again.",
-    primaryLabel: "Retry Connection",
-    secondaryLabel: "Network Scanner",
+    title: "Peer Sync Interrupted",
+    description: "Multicast packet loss detected on the local area network subnet.",
+    primaryLabel: "Retry Mesh Discovery",
+    secondaryLabel: "Diagnostics",
   },
 };
 
 export default function ErrorPage({
   type = "404",
-  onRetry = () => window.location.reload(),
-  onHome = () => { window.location.href = "/"; },
-}: ErrorPageProps = {}) {
-  const c = config[type];
+  onRetry,
+  onHome,
+}: ErrorPageProps) {
+  const c = CONFIGS[type] || CONFIGS["404"];
+
+  const handleHomeClick = () => {
+    if (onHome) onHome();
+    else window.location.href = "/";
+  };
+
+  const handleRetryClick = () => {
+    if (onRetry) onRetry();
+    else window.location.reload();
+  };
 
   return (
-    <div
-      style={{
-        backgroundColor: "#F7F9FC",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        paddingLeft: 24,
-        paddingRight: 24,
-        textAlign: "center",
-        fontFamily: "system-ui, -apple-system, sans-serif",
-      }}
-    >
-      {/* SVG Illustration */}
-      <div style={{ marginBottom: 24 }}>{c.svg}</div>
-
-      {/* Icon Pill */}
-      <div
-        style={{
-          width: 72,
-          height: 72,
-          borderRadius: 36,
-          backgroundColor: c.iconBg,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: 20,
-        }}
-      >
-        {c.icon}
+    <div className="min-h-screen bg-[#0B0C0E] text-[#FFFFFF] flex flex-col items-center justify-center p-6 text-center">
+      <div className="w-20 h-20 rounded-3xl bg-[rgba(255,122,0,0.12)] border border-[rgba(255,122,0,0.3)] flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(255,122,0,0.3)]">
+        {type === "offline" ? (
+          <WifiOff size={36} className="text-[#FF7A00]" />
+        ) : type === "server-offline" ? (
+          <Server size={36} className="text-[#FF7A00]" />
+        ) : (
+          <AlertOctagon size={36} className="text-[#FF7A00]" />
+        )}
       </div>
 
-      {/* Title */}
-      <div
-        style={{
-          fontSize: 24,
-          fontWeight: 700,
-          color: "#111827",
-          marginBottom: 8,
-        }}
-      >
-        {c.title}
-      </div>
-
-      {/* Description */}
-      <div
-        style={{
-          fontSize: 15,
-          color: "#667085",
-          maxWidth: 300,
-          lineHeight: 1.6,
-          marginTop: 8,
-        }}
-      >
+      <span className="text-xs font-mono font-bold text-[#FF7A00] uppercase tracking-widest mb-1.5">
+        Error Code {type.toUpperCase()}
+      </span>
+      <h1 className="text-2xl font-bold text-white mb-2">{c.title}</h1>
+      <p className="text-xs text-[#8E929E] max-w-sm mb-6 leading-relaxed">
         {c.description}
-      </div>
+      </p>
 
-      {/* Offline status list */}
-      {type === "offline" && (
-        <div
-          style={{
-            marginTop: 16,
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-            alignItems: "flex-start",
-          }}
-        >
-          {[
-            "LAN Connected",
-            "Master Node Online",
-            "Workers Online",
-          ].map((item) => (
-            <div
-              key={item}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                fontSize: 13,
-                color: "#111827",
-              }}
-            >
-              <CheckCircle2 size={16} color="#10B981" />
-              {item}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Buttons */}
-      <div
-        style={{
-          marginTop: 32,
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-          width: "100%",
-          maxWidth: 300,
-        }}
-      >
+      <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs">
         <button
-          onClick={type === "404" ? onHome : onRetry}
-          style={{
-            height: 48,
-            borderRadius: 12,
-            backgroundColor: "#8B5CF6",
-            color: "#FFFFFF",
-            border: "none",
-            fontSize: 15,
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
+          onClick={type === "404" ? handleHomeClick : handleRetryClick}
+          className="w-full h-11 rounded-xl bg-gradient-to-r from-[#FF7A00] to-[#FF5500] text-xs font-semibold text-white shadow-md hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
+          {type === "404" ? <Home size={15} /> : <RotateCcw size={15} />}
           {c.primaryLabel}
         </button>
+
         {c.secondaryLabel && (
           <button
-            onClick={onHome}
-            style={{
-              height: 48,
-              borderRadius: 12,
-              backgroundColor: "#FFFFFF",
-              color: "#111827",
-              border: "1px solid #E6EAF0",
-              fontSize: 15,
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
+            onClick={handleHomeClick}
+            className="w-full h-11 rounded-xl bg-[#18191E] border border-[#282A32] text-xs font-semibold text-[#8E929E] hover:text-white hover:border-[#FF7A00] transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
+            <Home size={15} />
             {c.secondaryLabel}
           </button>
         )}
