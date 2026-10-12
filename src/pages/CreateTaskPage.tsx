@@ -533,7 +533,7 @@ export default function CreateTaskPage({ onBack, onSubmitted }: CreateTaskPagePr
 
       {/* Bottom Sticky Action Footer */}
       {currentStep < 5 && (
-        <div className="sticky bottom-0 bg-[#111217]/95 backdrop-blur-md border-t border-[#24262E] px-4 py-3 flex items-center justify-between">
+        <div className="sticky bottom-14 lg:bottom-0 bg-[#111217]/95 backdrop-blur-md border-t border-[#24262E] px-4 py-3 flex items-center justify-between z-30">
           <button
             onClick={() => currentStep > 1 && setCurrentStep((s) => s - 1)}
             disabled={currentStep === 1}

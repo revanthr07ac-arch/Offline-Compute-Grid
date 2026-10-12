@@ -412,8 +412,8 @@ export default function FileManagerPage({ onFileSelect }: Props) {
                   style={{ width: "48%" }}
                 />
               </div>
-              <div className="flex items-center justify-between mt-2 text-[11px] text-[#8E929E]">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 mt-2 text-[11px] text-[#8E929E]">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-[#FF7A00]" />
                     Videos (142 GB)
@@ -434,7 +434,7 @@ export default function FileManagerPage({ onFileSelect }: Props) {
                       message: "Cluster cache cleaned. 1.4 GB freed."
                     });
                   }}
-                  className="text-[#FF7A00] hover:underline flex items-center gap-1"
+                  className="text-[#FF7A00] hover:underline flex items-center gap-1 cursor-pointer flex-shrink-0"
                 >
                   <RefreshCw size={11} /> Clean Cache
                 </button>

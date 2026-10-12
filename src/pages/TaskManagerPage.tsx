@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
   Search,
   Plus,
@@ -188,9 +189,24 @@ export default function TaskManagerPage({
   onTaskSelect,
   onCreateTask,
 }: TaskManagerPageProps) {
-  const { showToast } = useToast();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<TabKey>("running");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(() => {
+    try {
+      const q = new URLSearchParams(window.location.search).get("q");
+      return q || "";
+    } catch {
+      return "";
+    }
+  });
+
+  useEffect(() => {
+    try {
+      const q = new URLSearchParams(location.search).get("q");
+      if (q !== null) setSearchQuery(q);
+    } catch {}
+  }, [location.search]);
+
   const [tasks, setTasks] = useState<Task[]>(() => {
     const saved = localStorage.getItem("ocg_tasks");
     if (saved) {
@@ -482,16 +498,16 @@ export default function TaskManagerPage({
                 )}
 
                 {/* Worker Allocation & Actions Row */}
-                <div className="mt-3.5 pt-3 border-t border-[#20222A] flex items-center justify-between gap-3">
+                <div className="mt-3.5 pt-3 border-t border-[#20222A] flex flex-wrap items-center justify-between gap-2.5">
                   <div className="flex items-center gap-2 text-xs text-[#8E929E]">
                     <Cpu size={14} className="text-[#FF7A00]" />
                     <span>
-                      {task.workers > 0 ? `${task.workers} Worker Node(s) Assigned` : "Waiting for worker allocation"}
+                      {task.workers > 0 ? `${task.workers} Worker Node(s)` : "Pending allocation"}
                     </span>
                   </div>
 
                   {/* Contextual Action Buttons */}
-                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                     {task.status === "running" && (
                       <>
                         <button

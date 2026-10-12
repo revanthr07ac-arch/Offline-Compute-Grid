@@ -112,20 +112,20 @@ export default function PerformancePage() {
   return (
     <div className="min-h-screen bg-[#0B0C0E] text-[#FFFFFF] pb-24">
       {/* Sticky Topbar */}
-      <div className="sticky top-0 z-30 bg-[#111217]/95 backdrop-blur-md border-b border-[#24262E] px-4 py-3 flex items-center justify-between">
+      <div className="sticky top-0 z-30 bg-[#111217]/95 backdrop-blur-md border-b border-[#24262E] px-3.5 sm:px-6 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex items-center gap-2">
           <Activity size={18} className="text-[#FF7A00]" />
-          <h1 className="text-base font-bold text-[#FFFFFF]">Cluster Telemetry</h1>
+          <h1 className="text-sm sm:text-base font-bold text-[#FFFFFF]">Cluster Telemetry</h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Timeline Pills */}
           <div className="flex items-center bg-[#18191E] border border-[#282A32] rounded-xl p-0.5">
             {TIMELINE_OPTIONS.map((t) => (
               <button
                 key={t}
                 onClick={() => setSelectedTimeline(t)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   selectedTimeline === t
                     ? "bg-[#FF7A00] text-black shadow-sm"
                     : "text-[#8E929E] hover:text-[#FFFFFF]"
@@ -158,9 +158,11 @@ export default function PerformancePage() {
           {/* Export Button */}
           <button
             onClick={handleExportCSV}
-            className="px-3 py-1.5 rounded-xl bg-[#18191E] border border-[#282A32] text-xs font-semibold text-[#FF7A00] hover:bg-[#20222A] flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#18191E] border border-[#282A32] text-xs font-semibold text-[#FF7A00] hover:bg-[#20222A] flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Export CSV Telemetry"
           >
-            <Download size={14} /> Export CSV
+            <Download size={14} />
+            <span className="hidden sm:inline">Export CSV</span>
           </button>
         </div>
       </div>

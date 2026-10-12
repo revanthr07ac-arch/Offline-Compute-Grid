@@ -222,7 +222,7 @@ export default function GeminiAgentWidget() {
   return (
     <>
       {/* ─── Floating Trigger Button ────────────────────────────────────── */}
-      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
+      <div className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-40 flex items-center gap-3">
         {!isOpen && (
           <div
             onClick={() => setIsOpen(true)}
@@ -264,8 +264,8 @@ export default function GeminiAgentWidget() {
         <div
           className={`fixed z-50 transition-all duration-300 flex flex-col bg-[#0F1015]/95 backdrop-blur-xl border border-[#24262E] shadow-[0_20px_60px_rgba(0,0,0,0.8)] rounded-3xl overflow-hidden ${
             isExpanded
-              ? "inset-4 md:inset-8"
-              : "bottom-20 right-4 sm:right-6 w-[92vw] sm:w-[440px] h-[640px] max-h-[85vh]"
+              ? "inset-3 sm:inset-6 md:inset-8"
+              : "bottom-20 lg:bottom-6 right-3 sm:right-6 left-3 sm:left-auto w-auto sm:w-[440px] h-[600px] max-h-[calc(100vh-100px)]"
           }`}
         >
           {/* Header */}

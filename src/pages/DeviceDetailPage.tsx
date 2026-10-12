@@ -34,96 +34,125 @@ interface DeviceDetailPageProps {
 }
 
 const DEVICES_DATA: Record<string, DeviceType> = {
-  d1: {
-    id: "d1",
-    name: "DESKTOP-A7X (Master Node)",
+  "dev-01": {
+    id: "dev-01",
+    name: "MacBook Pro M2",
+    type: "Mac",
+    role: "Worker",
+    status: "busy",
+    cpu: 24,
+    ram: 68,
+    storage: 42,
+    net: "1.2 Gbps",
+    battery: 88,
+    uptime: "2d 5h",
+    os: "macOS Sonoma 14.5",
+    ip: "192.168.1.105",
+    hostname: "macbook-pro-m2.local",
+    ping: 2,
+    task: "4K Transcode Chunk #3",
+  },
+  "dev-02": {
+    id: "dev-02",
+    name: "DESKTOP-A7X (Master)",
     type: "PC",
     role: "Master",
-    status: "busy",
+    status: "online",
     cpu: 78,
     ram: 65,
-    storage: 48,
-    net: "1.2 GB/s",
+    storage: 55,
+    net: "2.5 Gbps",
     battery: null,
     uptime: "14h 23m",
     os: "Windows 11 Pro 64-bit",
     ip: "192.168.1.101",
     hostname: "desktop-a7x.local",
     ping: 1,
-    task: "4K Video Transcoding — Episode 12",
+    task: "Scheduler Coordinator",
   },
-  d2: {
-    id: "d2",
-    name: "Mac-Studio M2 Max",
-    type: "Mac",
-    role: "Worker",
-    status: "busy",
-    cpu: 42,
-    ram: 58,
-    storage: 35,
-    net: "950 MB/s",
-    battery: null,
-    uptime: "3d 4h",
-    os: "macOS Sonoma 14.5",
-    ip: "192.168.1.108",
-    hostname: "mac-studio.local",
-    ping: 2,
-    task: "Metal Acceleration Worker",
-  },
-  d3: {
-    id: "d3",
-    name: "Worker-Rig-RTX",
+  "dev-03": {
+    id: "dev-03",
+    name: "Workstation Linux",
     type: "PC",
     role: "Worker",
-    status: "busy",
-    cpu: 84,
-    ram: 76,
-    storage: 62,
-    net: "1.8 GB/s",
+    status: "online",
+    cpu: 45,
+    ram: 52,
+    storage: 38,
+    net: "1.0 Gbps",
     battery: null,
-    uptime: "1d 12h",
+    uptime: "5d 11h",
     os: "Ubuntu 24.04 LTS (CUDA 12.4)",
-    ip: "192.168.1.110",
-    hostname: "worker-rig-rtx.local",
-    ping: 1,
-    task: "PyTorch DDP Mesh Worker",
+    ip: "192.168.1.112",
+    hostname: "ubuntu-box.local",
+    ping: 3,
+    task: "Distributed Telemetry #1",
   },
-  d4: {
-    id: "d4",
-    name: "Laptop-Dev",
-    type: "Laptop",
+  "dev-04": {
+    id: "dev-04",
+    name: "Galaxy S24 Ultra",
+    type: "Android",
     role: "Worker",
     status: "idle",
-    cpu: 12,
-    ram: 34,
-    storage: 22,
-    net: "420 MB/s",
-    battery: 88,
-    uptime: "6h 10m",
-    os: "Fedora 40 Workstation",
-    ip: "192.168.1.104",
-    hostname: "laptop-dev.local",
+    cpu: 18,
+    ram: 44,
+    storage: 28,
+    net: "850 Mbps",
+    battery: 92,
+    uptime: "1d 2h",
+    os: "Android 14 (OneUI 6)",
+    ip: "192.168.1.144",
+    hostname: "galaxy-s24.local",
     ping: 4,
     task: null,
   },
-  d5: {
-    id: "d5",
-    name: "RPi-4 Node A",
+  "dev-05": {
+    id: "dev-05",
+    name: "Raspberry Pi 5 Cluster",
     type: "Pi",
     role: "Worker",
-    status: "online",
-    cpu: 24,
-    ram: 45,
-    storage: 15,
-    net: "120 MB/s",
+    status: "idle",
+    cpu: 12,
+    ram: 35,
+    storage: 64,
+    net: "1.0 Gbps",
     battery: null,
-    uptime: "28d 14h",
-    os: "Debian Bookworm (ARM64)",
-    ip: "192.168.1.105",
-    hostname: "rpi4-node-a.local",
-    ping: 3,
+    uptime: "12d 8h",
+    os: "Raspberry Pi OS 64-bit",
+    ip: "192.168.1.199",
+    hostname: "rpi5-cluster.local",
+    ping: 5,
     task: null,
   },
+  "dev-06": {
+    id: "dev-06",
+    name: "NAS Storage Node",
+    type: "PC",
+    role: "Worker",
+    status: "offline",
+    cpu: 0,
+    ram: 0,
+    storage: 88,
+    net: "Offline",
+    battery: null,
+    uptime: "—",
+    os: "TrueNAS Core",
+    ip: "192.168.1.250",
+    hostname: "truenas-core.local",
+    ping: null,
+    task: null,
+  },
+  // Aliases for backend numeric IDs & legacy IDs
+  "1": { id: "1", name: "DESKTOP-A7X", type: "PC", role: "Master", ip: "192.168.1.101", hostname: "desktop-a7x", cpu: 78, ram: 65, storage: 42, battery: 91, net: "1.2 Gbps", os: "Ubuntu 22.04", ping: 0, status: "online", task: "Coordinating" },
+  "2": { id: "2", name: "PC-Tower-2", type: "PC", role: "Worker", ip: "192.168.1.102", hostname: "workstation-b2", cpu: 45, ram: 52, storage: 78, battery: null, net: "1.0 Gbps", os: "Windows 11", ping: 1, status: "busy", task: "Video Encode" },
+  "3": { id: "3", name: "RPi-4B-3", type: "Pi", role: "Worker", ip: "192.168.1.103", hostname: "raspberrypi-3", cpu: 89, ram: 71, storage: 23, battery: null, net: "100 Mbps", os: "Raspberry Pi OS", ping: 2, status: "busy", task: "OCR Batch" },
+  "4": { id: "4", name: "Samsung-A54", type: "Android", role: "Worker", ip: "192.168.1.104", hostname: "android-samsung", cpu: 34, ram: 48, storage: 56, battery: 67, net: "300 Mbps", os: "Android 14", ping: 8, status: "idle", task: null },
+  "5": { id: "5", name: "MacBook-Pro-5", type: "Mac", role: "Worker", ip: "192.168.1.105", hostname: "MBP-M3-5", cpu: 23, ram: 38, storage: 31, battery: 84, net: "1.2 Gbps", os: "macOS 14", ping: 1, status: "online", task: null },
+  d1: { id: "d1", name: "DESKTOP-A7X (Master)", type: "PC", role: "Master", status: "online", cpu: 78, ram: 65, storage: 48, net: "1.2 GB/s", battery: null, uptime: "14h 23m", os: "Windows 11 Pro", ip: "192.168.1.101", hostname: "desktop-a7x.local", ping: 1, task: "4K Video Transcoding — Episode 12" },
+  d2: { id: "d2", name: "Mac-Studio M2 Max", type: "Mac", role: "Worker", status: "busy", cpu: 42, ram: 58, storage: 35, net: "950 MB/s", battery: null, uptime: "3d 4h", os: "macOS Sonoma 14.5", ip: "192.168.1.108", hostname: "mac-studio.local", ping: 2, task: "Metal Acceleration Worker" },
+  d3: { id: "d3", name: "Worker-Rig-RTX", type: "PC", role: "Worker", status: "busy", cpu: 84, ram: 76, storage: 62, net: "1.8 GB/s", battery: null, uptime: "1d 12h", os: "Ubuntu 24.04 LTS (CUDA 12.4)", ip: "192.168.1.110", hostname: "worker-rig-rtx.local", ping: 1, task: "PyTorch DDP Mesh Worker" },
+  d4: { id: "d4", name: "Laptop-Dev", type: "Laptop", role: "Worker", status: "idle", cpu: 12, ram: 34, storage: 22, net: "420 MB/s", battery: 88, uptime: "6h 10m", os: "Fedora 40 Workstation", ip: "192.168.1.104", hostname: "laptop-dev.local", ping: 4, task: null },
+  d5: { id: "d5", name: "RPi-4 Node A", type: "Pi", role: "Worker", status: "online", cpu: 24, ram: 45, storage: 15, net: "120 MB/s", battery: null, uptime: "28d 14h", os: "Debian Bookworm (ARM64)", ip: "192.168.1.105", hostname: "rpi4-node-a.local", ping: 3, task: null },
 };
 
 function DeviceIcon({ type }: { type: DeviceType["type"] }) {
@@ -199,7 +228,7 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
 
   const [device, setDevice] = useState<DeviceType>(() => {
     return DEVICES_DATA[deviceId] || {
-      ...DEVICES_DATA["d1"],
+      ...DEVICES_DATA["dev-01"],
       id: deviceId,
       name: `Cluster Node (${deviceId})`,
     };
@@ -212,7 +241,6 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
         if (data && data.name) setDevice(data);
       })
       .catch(() => {
-        // Try getting from all devices list
         fetch("/api/devices")
           .then((r) => r.json())
           .then((list) => {
@@ -226,6 +254,9 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
   }, [deviceId]);
 
   const [isRebooting, setIsRebooting] = useState(false);
+  const [isPinging, setIsPinging] = useState(false);
+  const [isBenchmarking, setIsBenchmarking] = useState(false);
+  const [benchmarkResult, setBenchmarkResult] = useState<string | null>(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
 
   const chartData = useMemo(() => {
@@ -244,7 +275,38 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
     setTimeout(() => {
       setIsRebooting(false);
       showToast({ type: "success", message: `${device.name} restarted and re-joined mesh.` });
-    }, 2500);
+    }, 2000);
+  };
+
+  const handlePingTest = () => {
+    setIsPinging(true);
+    setTimeout(() => {
+      const simulatedPing = Math.floor(Math.random() * 3 + 1);
+      setDevice((d) => ({ ...d, ping: simulatedPing, status: d.status === "offline" ? "online" : d.status }));
+      setIsPinging(false);
+      showToast({ type: "success", message: `ICMP Ping response from ${device.ip}: ${simulatedPing} ms (0% loss)` });
+    }, 800);
+  };
+
+  const handleRunBenchmark = () => {
+    setIsBenchmarking(true);
+    setBenchmarkResult(null);
+    showToast({ type: "info", message: `Executing matrix multiplication & memory bandwidth test on ${device.name}...` });
+    setTimeout(() => {
+      setIsBenchmarking(false);
+      const score = Math.floor(Math.random() * 450 + 820);
+      setBenchmarkResult(`${score} GFLOPS • 42.8 GB/s Mem Bandwidth`);
+      showToast({ type: "success", message: `Benchmark complete: ${score} GFLOPS verified!` });
+    }, 2200);
+  };
+
+  const handleToggleRole = () => {
+    const newRole = device.role === "Master" ? "Worker" : "Master";
+    setDevice((d) => ({ ...d, role: newRole }));
+    showToast({
+      type: "success",
+      message: `Role switched: ${device.name} is now designated as ${newRole}.`
+    });
   };
 
   const handleTogglePause = () => {
@@ -258,8 +320,13 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
   };
 
   const handleDisconnect = () => {
-    setDevice((d) => ({ ...d, status: "offline", ping: null }));
-    showToast({ type: "error", message: `${device.name} disconnected from grid.` });
+    if (device.status === "offline") {
+      setDevice((d) => ({ ...d, status: "online", ping: 2 }));
+      showToast({ type: "success", message: `${device.name} reconnected to LAN mesh!` });
+    } else {
+      setDevice((d) => ({ ...d, status: "offline", ping: null }));
+      showToast({ type: "error", message: `${device.name} disconnected from grid.` });
+    }
   };
 
   const handleAssignTask = (taskName: string) => {
@@ -271,31 +338,48 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
   return (
     <div className="min-h-screen bg-[#0B0C0E] text-[#FFFFFF] pb-24">
       {/* Top Navbar */}
-      <div className="sticky top-0 z-30 bg-[#111217]/95 backdrop-blur-md border-b border-[#24262E] px-4 py-3 flex items-center justify-between">
+      <div className="sticky top-0 z-30 bg-[#111217]/95 backdrop-blur-md border-b border-[#24262E] px-3 sm:px-6 py-3 flex items-center justify-between">
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-xs font-semibold text-[#8E929E] hover:text-[#FFFFFF] cursor-pointer"
+          className="flex items-center gap-1.5 text-xs font-semibold text-[#8E929E] hover:text-white cursor-pointer"
         >
           <ChevronLeft size={18} /> Back to Devices
         </button>
-        <StatusBadge status={isRebooting ? "idle" : device.status} />
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-mono text-[#8E929E] hidden sm:inline">{device.role} Node</span>
+          <StatusBadge status={isRebooting ? "idle" : device.status} />
+        </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 pt-5 space-y-4">
+      <div className="max-w-4xl mx-auto px-3.5 sm:px-6 pt-5 space-y-4">
         {/* Device Hero Card */}
-        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
-          <div className="flex items-start justify-between gap-4">
+        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3.5">
               <DeviceIcon type={device.type} />
               <div>
-                <h1 className="text-lg font-bold text-[#FFFFFF]">{device.name}</h1>
-                <p className="text-xs text-[#8E929E] mt-0.5 font-mono">{device.ip} • Uptime: {device.uptime}</p>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-base sm:text-lg font-bold text-white">{device.name}</h1>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[rgba(255,122,0,0.15)] text-[#FF7A00] border border-[rgba(255,122,0,0.3)]">
+                    {device.role}
+                  </span>
+                </div>
+                <p className="text-xs text-[#8E929E] mt-0.5 font-mono">{device.ip} • Uptime: {device.uptime || "14h 23m"}</p>
               </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleToggleRole}
+                className="btn-secondary px-3 py-1.5 text-xs font-semibold"
+              >
+                Switch to {device.role === "Master" ? "Worker" : "Master"}
+              </button>
             </div>
           </div>
 
           {/* Metrics Circular Cards */}
-          <div className="grid grid-cols-3 gap-3 mt-5">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3 mt-5">
             <MetricCard
               label="CPU Load"
               value={device.cpu}
@@ -318,9 +402,9 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
         </div>
 
         {/* Real-time CPU Usage Graph */}
-        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-bold text-[#FFFFFF] flex items-center gap-2">
+            <span className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
               <Activity size={16} className="text-[#FF7A00]" />
               Telemetry Trend (Last 15 min)
             </span>
@@ -348,13 +432,32 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
           </div>
         </div>
 
+        {/* Benchmark Results Banner if Run */}
+        {benchmarkResult && (
+          <div className="bg-[rgba(255,122,0,0.12)] border border-[rgba(255,122,0,0.3)] rounded-2xl p-4 flex items-center justify-between animate-fade-in">
+            <div className="flex items-center gap-3">
+              <Zap size={18} className="text-[#FF7A00]" />
+              <div>
+                <div className="text-xs font-bold text-white">Hardware Benchmark Verified</div>
+                <div className="text-xs text-[#FF7A00] font-mono mt-0.5">{benchmarkResult}</div>
+              </div>
+            </div>
+            <button
+              onClick={() => setBenchmarkResult(null)}
+              className="text-[#8E929E] hover:text-white text-xs"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         {/* Active Task Card */}
-        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
-          <h2 className="text-sm font-bold text-[#FFFFFF] mb-3">Workload Allocation</h2>
+        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <h2 className="text-sm font-bold text-white mb-3">Workload Allocation</h2>
           {device.task ? (
             <div className="bg-[#0B0C0E] border border-[#20222A] rounded-xl p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#FFFFFF] flex items-center gap-2">
+                <span className="text-xs font-bold text-white flex items-center gap-2">
                   <Zap size={14} className="text-[#FF7A00]" />
                   {device.task}
                 </span>
@@ -367,14 +470,14 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
                 <span>Throughput: {device.net}</span>
                 <button
                   onClick={() => handleTogglePause()}
-                  className="text-xs text-[#FF7A00] hover:underline"
+                  className="text-xs text-[#FF7A00] hover:underline cursor-pointer"
                 >
                   Pause Chunk
                 </button>
               </div>
             </div>
           ) : (
-            <div className="bg-[#0B0C0E] border border-[#20222A] rounded-xl p-6 text-center">
+            <div className="bg-[#0B0C0E] border border-[#20222A] rounded-xl p-5 text-center">
               <p className="text-xs text-[#8E929E] mb-3">No active compute task currently assigned to this node.</p>
               <button
                 onClick={() => setShowAssignModal(true)}
@@ -387,8 +490,8 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
         </div>
 
         {/* Node Specs & Network Info */}
-        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)] space-y-3 text-xs">
-          <h2 className="text-sm font-bold text-[#FFFFFF] mb-2">Node Specifications</h2>
+        <div className="bg-[#14151B] border border-[#24262E] rounded-2xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.3)] space-y-3 text-xs">
+          <h2 className="text-sm font-bold text-white mb-2">Node Specifications</h2>
           <div className="flex justify-between py-1.5 border-b border-[#20222A]">
             <span className="text-[#8E929E]">Operating System</span>
             <span className="font-semibold text-white">{device.os}</span>
@@ -407,29 +510,45 @@ export default function DeviceDetailPage({ deviceId, onBack }: DeviceDetailPageP
           </div>
         </div>
 
-        {/* Control Action Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Control Action Buttons: Fully Responsive Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+          <button
+            onClick={handlePingTest}
+            disabled={isPinging}
+            className="h-11 rounded-xl bg-[#18191E] border border-[#282A32] text-xs font-semibold text-white hover:border-[#10B981] flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            <Activity size={15} className={isPinging ? "animate-pulse text-[#10B981]" : "text-[#10B981]"} />
+            {isPinging ? "Pinging..." : "Ping Test"}
+          </button>
+
+          <button
+            onClick={handleRunBenchmark}
+            disabled={isBenchmarking}
+            className="h-11 rounded-xl bg-[#18191E] border border-[#282A32] text-xs font-semibold text-[#FFA033] hover:border-[#FFA033] flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            <Zap size={15} className={isBenchmarking ? "animate-spin" : ""} />
+            {isBenchmarking ? "Testing..." : "Benchmark"}
+          </button>
+
           <button
             onClick={handleRestart}
             disabled={isRebooting}
             className="h-11 rounded-xl bg-[#18191E] border border-[#282A32] text-xs font-semibold text-white hover:border-[#FF7A00] flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
             <RotateCcw size={15} className={isRebooting ? "animate-spin text-[#FF7A00]" : ""} />
-            {isRebooting ? "Rebooting..." : "Restart Node"}
+            {isRebooting ? "Rebooting..." : "Restart"}
           </button>
-          <button
-            onClick={handleTogglePause}
-            className="h-11 rounded-xl bg-[#18191E] border border-[#282A32] text-xs font-semibold text-[#FF7A00] hover:bg-[#20222A] flex items-center justify-center gap-2 transition-all cursor-pointer"
-          >
-            {device.status === "busy" ? <PauseCircle size={15} /> : <PlayCircle size={15} />}
-            {device.status === "busy" ? "Pause Worker" : "Resume Worker"}
-          </button>
+
           <button
             onClick={handleDisconnect}
-            className="h-11 rounded-xl bg-red-500/15 border border-red-500/30 text-xs font-semibold text-red-400 hover:bg-red-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+            className={`h-11 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              device.status === "offline"
+                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25"
+                : "bg-red-500/15 border-red-500/30 text-red-400 hover:bg-red-500/25"
+            }`}
           >
             <WifiOff size={15} />
-            Disconnect Node
+            {device.status === "offline" ? "Reconnect" : "Disconnect"}
           </button>
         </div>
       </div>

@@ -250,6 +250,54 @@ export default function DashboardPage() {
   const [jobProgress, setJobProgress] = useState(67);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
+  const [recentTasks, setRecentTasks] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem("ocg_tasks");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.slice(0, 4).map((t) => ({
+            id: t.id,
+            name: t.name,
+            status: t.status === "running" ? "Running" : t.status === "completed" ? "Completed" : t.status === "pending" ? "Pending" : "Failed",
+            pct: t.progress,
+            speed: t.eta || "2.4 GB/s",
+          }));
+        }
+      }
+    } catch {}
+    return [
+      { id: "t1", name: "4K Video Transcoding", status: "Running", pct: 67, speed: "2.4 GB/s" },
+      { id: "t2", name: "Federated Sensor Aggregate #41", status: "Completed", pct: 100, speed: "1.8 GB/s" },
+      { id: "t3", name: "OCR Batch Processing Q3", status: "Completed", pct: 100, speed: "3.1 GB/s" },
+    ];
+  });
+
+  // Sync tasks on storage changes
+  useEffect(() => {
+    const handleStorage = () => {
+      try {
+        const saved = localStorage.getItem("ocg_tasks");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setRecentTasks(
+              parsed.slice(0, 4).map((t) => ({
+                id: t.id,
+                name: t.name,
+                status: t.status === "running" ? "Running" : t.status === "completed" ? "Completed" : t.status === "pending" ? "Pending" : "Failed",
+                pct: t.progress,
+                speed: t.eta || "2.4 GB/s",
+              }))
+            );
+          }
+        }
+      } catch {}
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
   // Poll job progress
   useEffect(() => {
     const timer = setInterval(() => {
@@ -277,10 +325,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <div style={{ padding: "20px 24px", maxWidth: 1400, margin: "0 auto" }}>
+    <div className="px-3.5 sm:px-6 py-4 sm:py-6 max-w-7xl mx-auto space-y-5">
       {/* ── Section 0: Gemini AI Grid Copilot Banner ── */}
       <div
-        className="bg-gradient-to-r from-[#181922] via-[#1A1C24] to-[#16171E] border border-[#2B2D38] hover:border-[#FF7A00]/40 transition-all rounded-2xl p-4 mb-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg shadow-black/30"
+        className="bg-gradient-to-r from-[#181922] via-[#1A1C24] to-[#16171E] border border-[#2B2D38] hover:border-[#FF7A00]/40 transition-all rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg shadow-black/30"
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF7A00]/20 to-[#FF4500]/10 border border-[#FF7A00]/30 flex items-center justify-center text-[#FF7A00] flex-shrink-0 shadow-[0_0_15px_rgba(255,122,0,0.25)]">
@@ -316,49 +364,24 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Section 1: CURRENT JOB Card (Image 1) ── */}
+      {/* ── Section 1: CURRENT JOB Card ── */}
       <div
-        style={{
-          backgroundColor: "#18191E",
-          border: "1px solid #282A32",
-          borderRadius: 16,
-          padding: 24,
-          marginBottom: 20,
-        }}
+        className="bg-[#18191E] border border-[#282A32] rounded-2xl p-4 sm:p-6"
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#8E929E", letterSpacing: "0.08em" }}>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-2.5">
+          <div className="text-[11px] font-bold text-[#8E929E] tracking-wider uppercase">
             CURRENT JOB
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="flex items-center gap-2.5 flex-wrap">
             <span
-              style={{
-                backgroundColor: "#FF7A00",
-                color: "#FFFFFF",
-                fontSize: 12,
-                fontWeight: 700,
-                padding: "3px 12px",
-                borderRadius: 20,
-                boxShadow: "0 0 10px rgba(255, 122, 0, 0.4)",
-              }}
+              className="bg-[#FF7A00] text-white text-xs font-bold px-3 py-1 rounded-full shadow-[0_0_10px_rgba(255,122,0,0.4)]"
             >
               {jobStatus === "running" ? "Processing" : "Paused"}
             </span>
 
             <button
               onClick={handleToggleJob}
-              style={{
-                background: "none",
-                border: "1px solid #282A32",
-                borderRadius: 8,
-                padding: "4px 10px",
-                color: "#CBD5E1",
-                cursor: "pointer",
-                fontSize: 12,
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-              }}
+              className="border border-[#282A32] hover:border-[#FF7A00] rounded-lg px-2.5 py-1 text-slate-300 text-xs flex items-center gap-1.5 cursor-pointer transition-colors"
             >
               {jobStatus === "running" ? <Pause size={13} /> : <Play size={13} />}
               {jobStatus === "running" ? "Pause" : "Resume"}
@@ -366,35 +389,20 @@ export default function DashboardPage() {
 
             <button
               onClick={handleAbortJob}
-              style={{
-                background: "none",
-                border: "1px solid #282A32",
-                borderRadius: 8,
-                padding: "4px 8px",
-                color: "#EF4444",
-                cursor: "pointer",
-                fontSize: 12,
-              }}
+              title="Abort Job"
+              className="border border-[#282A32] hover:border-red-500 rounded-lg p-1.5 text-red-500 text-xs cursor-pointer transition-colors"
             >
               <XCircle size={14} />
             </button>
           </div>
         </div>
 
-        <div style={{ fontSize: 18, fontWeight: 700, color: "#FFFFFF", marginBottom: 14 }}>
+        <div className="text-base sm:text-lg font-bold text-white mb-3">
           4K Video Transcoding — Episode 12
         </div>
 
         {/* Glowing Orange Progress Bar */}
-        <div
-          style={{
-            height: 8,
-            backgroundColor: "#141519",
-            borderRadius: 6,
-            overflow: "hidden",
-            marginBottom: 10,
-          }}
-        >
+        <div className="h-2 bg-[#141519] rounded-md overflow-hidden mb-2.5">
           <div
             style={{
               width: `${jobProgress}%`,
@@ -408,29 +416,17 @@ export default function DashboardPage() {
         </div>
 
         {/* ETA & Speed */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <span style={{ fontSize: 13, color: "#CBD5E1", fontWeight: 500 }}>
-            {jobProgress}% • ETA 41 min
-          </span>
-          <span style={{ fontSize: 13, color: "#CBD5E1", fontWeight: 700 }}>
-            2.4 GB/s
-          </span>
+        <div className="flex items-center justify-between text-xs sm:text-sm text-slate-300 font-medium mb-3.5">
+          <span>{jobProgress}% • ETA 41 min</span>
+          <span className="font-bold text-white">2.4 GB/s</span>
         </div>
 
         {/* Metadata Badges */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <div className="flex gap-2 flex-wrap">
           {["5 Workers", "25 Chunks", "GPU Accelerated"].map((tag) => (
             <span
               key={tag}
-              style={{
-                backgroundColor: "#20222A",
-                border: "1px solid #2E313C",
-                color: "#CBD5E1",
-                fontSize: 12,
-                fontWeight: 600,
-                borderRadius: 8,
-                padding: "4px 12px",
-              }}
+              className="bg-[#20222A] border border-[#2E313C] text-slate-300 text-xs font-semibold rounded-lg px-3 py-1"
             >
               {tag}
             </span>
@@ -438,68 +434,35 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Section 2: 4 Telemetry Mini-Charts (Image 1) ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: 16,
-          marginBottom: 20,
-        }}
-      >
+      {/* ── Section 2: 4 Telemetry Mini-Charts ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <OrangeMetricCard label="COMPUTE LOAD" value="84%" data={computeLoadData} />
         <OrangeMetricCard label="MEMORY MESH" value="76%" data={memoryMeshData} />
         <OrangeMetricCard label="P2P TRAFFIC" value="90 MB/s" data={p2pTrafficData} />
         <OrangeMetricCard label="DISK THROUGHPUT" value="55 MB/s" data={diskThroughputData} />
       </div>
 
-      {/* ── Section 3: Grid Monitor & Master Node (Image 3) ── */}
-      <div
-        style={{
-          backgroundColor: "#18191E",
-          border: "1px solid #24262E",
-          borderRadius: 16,
-          padding: 24,
-          marginBottom: 20,
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+      {/* ── Section 3: Grid Monitor & Master Node ── */}
+      <div className="bg-[#18191E] border border-[#24262E] rounded-2xl p-4 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: "#FFFFFF", margin: "0 0 4px" }}>
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-0.5">
               Grid Monitor
             </h2>
-            <div style={{ fontSize: 13, color: "#8E929E" }}>
+            <div className="text-xs sm:text-sm text-[#8E929E]">
               Cluster Telemetry & Workload Overview
             </div>
           </div>
           <span
-            style={{
-              backgroundColor: "rgba(255, 122, 0, 0.15)",
-              color: "#FF7A00",
-              border: "1px solid rgba(255, 122, 0, 0.35)",
-              borderRadius: 20,
-              padding: "4px 12px",
-              fontSize: 12,
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
+            className="bg-[rgba(255,122,0,0.15)] text-[#FF7A00] border border-[rgba(255,122,0,0.35)] rounded-full px-3 py-1 text-xs font-semibold flex items-center gap-1.5"
           >
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF7A00", boxShadow: "0 0 6px #FF7A00" }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF7A00] shadow-[0_0_6px_#FF7A00]" />
             Live Grid Online
           </span>
         </div>
 
         {/* 6 Grid Metric Stat Cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-            gap: 12,
-            marginBottom: 20,
-          }}
-        >
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 mb-5">
           {[
             { label: "Connected Devices", val: "8", sub: "7 online", icon: Monitor },
             { label: "CPU Cores", val: "48", sub: "3.2 GHz avg", icon: Cpu },
@@ -510,195 +473,121 @@ export default function DashboardPage() {
           ].map(({ label, val, sub, icon: Icon }) => (
             <div
               key={label}
-              style={{
-                backgroundColor: "#141519",
-                border: "1px solid #24262E",
-                borderRadius: 12,
-                padding: "14px 16px",
-              }}
+              className="bg-[#141519] border border-[#24262E] rounded-xl p-3 sm:p-3.5 flex flex-col justify-between"
             >
-              <div
-                style={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: 8,
-                  backgroundColor: "rgba(255, 122, 0, 0.12)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#FF7A00",
-                  marginBottom: 8,
-                }}
-              >
-                <Icon size={16} />
+              <div className="w-7 h-7 rounded-lg bg-[rgba(255,122,0,0.12)] flex items-center justify-center text-[#FF7A00] mb-2">
+                <Icon size={15} />
               </div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: "#FFFFFF", lineHeight: 1.1 }}>
-                {val}
-              </div>
-              <div style={{ fontSize: 11, fontWeight: 500, color: "#CBD5E1", marginTop: 4 }}>
-                {label}
-              </div>
-              <div style={{ fontSize: 11, color: "#8E929E", marginTop: 2 }}>
-                {sub}
+              <div>
+                <div className="text-lg sm:text-xl font-bold text-white leading-tight">
+                  {val}
+                </div>
+                <div className="text-[11px] font-medium text-slate-300 mt-1 line-clamp-1">
+                  {label}
+                </div>
+                <div className="text-[10px] text-[#8E929E] mt-0.5">
+                  {sub}
+                </div>
               </div>
             </div>
           ))}
         </div>
 
         {/* Master Node Banner Card */}
-        <div
-          style={{
-            backgroundColor: "#141519",
-            border: "1px solid #282A32",
-            borderRadius: 12,
-            padding: 18,
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#8E929E", letterSpacing: "0.08em" }}>
+        <div className="bg-[#141519] border border-[#282A32] rounded-xl p-4 sm:p-4.5">
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="text-[11px] font-bold text-[#8E929E] tracking-wider uppercase">
               MASTER NODE
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#FF7A00", fontWeight: 600 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF7A00" }} />
+            <div className="flex items-center gap-1.5 text-xs text-[#FF7A00] font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF7A00]" />
               Active Controller
             </div>
           </div>
 
-          <div style={{ fontSize: 16, fontWeight: 700, color: "#FFFFFF", marginBottom: 2 }}>
+          <div className="text-base font-bold text-white mb-0.5">
             DESKTOP-A7X
           </div>
-          <div style={{ fontSize: 13, color: "#8E929E", marginBottom: 14 }}>
+          <div className="text-xs text-[#8E929E] mb-3">
             192.168.1.101 • Port 3001
           </div>
 
-          <div style={{ display: "flex", gap: 28, flexWrap: "wrap", marginBottom: 12 }}>
+          <div className="flex gap-4 sm:gap-7 flex-wrap mb-3">
             <div>
-              <div style={{ fontSize: 10, color: "#8E929E", fontWeight: 600 }}>CPU UTILIZATION</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>78%</div>
+              <div className="text-[10px] text-[#8E929E] font-semibold">CPU UTILIZATION</div>
+              <div className="text-sm sm:text-base font-bold text-white">78%</div>
             </div>
             <div>
-              <div style={{ fontSize: 10, color: "#8E929E", fontWeight: 600 }}>RAM ALLOCATION</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>65%</div>
+              <div className="text-[10px] text-[#8E929E] font-semibold">RAM ALLOCATION</div>
+              <div className="text-sm sm:text-base font-bold text-white">65%</div>
             </div>
             <div>
-              <div style={{ fontSize: 10, color: "#8E929E", fontWeight: 600 }}>CLUSTER UPTIME</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>14h 23m</div>
+              <div className="text-[10px] text-[#8E929E] font-semibold">CLUSTER UPTIME</div>
+              <div className="text-sm sm:text-base font-bold text-white">14h 23m</div>
             </div>
           </div>
 
-          <div style={{ fontSize: 12, color: "#CBD5E1", display: "flex", alignItems: "center", gap: 6 }}>
-            <Users size={14} color="#FF7A00" />
+          <div className="text-xs text-slate-300 flex items-center gap-2">
+            <Users size={14} className="text-[#FF7A00]" />
             <span>5 Active Worker Nodes Offloading Tasks</span>
           </div>
         </div>
       </div>
 
-      {/* ── Section 4: Interactive Mesh Topology (Image 2) ── */}
-      <div style={{ marginBottom: 20 }}>
+      {/* ── Section 4: Interactive Mesh Topology ── */}
+      <div>
         <MeshTopology onSelectWorker={(workerName) => setSelectedNode(workerName)} />
       </div>
 
-      {/* ── Section 5: Recent Tasks (Image 1) ── */}
-      <div
-        style={{
-          backgroundColor: "#18191E",
-          border: "1px solid #24262E",
-          borderRadius: 16,
-          padding: 24,
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <span style={{ fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>
+      {/* ── Section 5: Recent Tasks ── */}
+      <div className="bg-[#18191E] border border-[#24262E] rounded-2xl p-4 sm:p-6">
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-base sm:text-lg font-bold text-white">
             Recent Tasks
           </span>
           <button
             onClick={() => navigate("/tasks")}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#FF7A00",
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-            }}
+            className="text-xs sm:text-sm font-semibold text-[#FF7A00] hover:underline flex items-center gap-1 cursor-pointer"
           >
-            View All →
+            <span>View All</span>
+            <ArrowRight size={14} />
           </button>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {[
-            { name: "4K Video Transcoding", status: "Running", pct: 67, speed: "2.4 GB/s" },
-            { name: "Federated Sensor Aggregate #41", status: "Completed", pct: 100, speed: "1.8 GB/s" },
-            { name: "OCR Batch Processing Q3", status: "Completed", pct: 100, speed: "3.1 GB/s" },
-          ].map((task) => (
+        <div className="flex flex-col gap-2.5">
+          {recentTasks.map((task) => (
             <div
-              key={task.name}
+              key={task.id || task.name}
               onClick={() => navigate("/tasks")}
-              style={{
-                backgroundColor: "#141519",
-                border: "1px solid #24262E",
-                borderRadius: 12,
-                padding: "14px 16px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                cursor: "pointer",
-                transition: "border-color 0.15s ease",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#FF7A00")}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#24262E")}
+              className="bg-[#141519] border border-[#24262E] hover:border-[#FF7A00] rounded-xl p-3 sm:p-4 flex items-center justify-between cursor-pointer transition-all"
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 10,
-                    backgroundColor: "rgba(255, 122, 0, 0.12)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#FF7A00",
-                  }}
-                >
-                  <Activity size={18} />
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-[rgba(255,122,0,0.12)] flex items-center justify-center text-[#FF7A00] flex-shrink-0">
+                  <Activity size={17} />
                 </div>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>
+                <div className="min-w-0">
+                  <div className="text-xs sm:text-sm font-semibold text-white truncate">
                     {task.name}
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+                  <div className="flex items-center gap-2 mt-1">
                     <span
-                      style={{
-                        backgroundColor: task.status === "Running" ? "rgba(255, 122, 0, 0.18)" : "rgba(16, 185, 129, 0.18)",
-                        color: task.status === "Running" ? "#FF7A00" : "#10B981",
-                        fontSize: 11,
-                        fontWeight: 700,
-                        padding: "2px 8px",
-                        borderRadius: 12,
-                      }}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        task.status === "Running"
+                          ? "bg-[rgba(255,122,0,0.18)] text-[#FF7A00]"
+                          : task.status === "Completed"
+                          ? "bg-[rgba(16,185,129,0.18)] text-[#10B981]"
+                          : "bg-[#282A32] text-[#8E929E]"
+                      }`}
                     >
                       {task.status}
                     </span>
-                    <span style={{ fontSize: 12, color: "#8E929E" }}>{task.speed}</span>
+                    <span className="text-[11px] text-[#8E929E] truncate">{task.speed}</span>
                   </div>
                 </div>
               </div>
 
-              <div style={{ width: 100, textAlign: "right" }}>
-                <div
-                  style={{
-                    height: 5,
-                    backgroundColor: "#20222A",
-                    borderRadius: 3,
-                    overflow: "hidden",
-                    marginBottom: 4,
-                  }}
-                >
+              <div className="w-20 sm:w-24 text-right flex-shrink-0 ml-3">
+                <div className="h-1.5 bg-[#20222A] rounded-full overflow-hidden mb-1">
                   <div
                     style={{
                       width: `${task.pct}%`,
@@ -707,7 +596,7 @@ export default function DashboardPage() {
                     }}
                   />
                 </div>
-                <span style={{ fontSize: 11, color: "#8E929E" }}>{task.pct}%</span>
+                <span className="text-[11px] text-[#8E929E] font-mono">{task.pct}%</span>
               </div>
             </div>
           ))}

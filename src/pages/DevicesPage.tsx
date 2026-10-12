@@ -248,18 +248,10 @@ export default function DevicesPage({ onDeviceSelect }: DevicesPageProps) {
   const onlineCount = devices.filter((d) => d.status === "online" || d.status === "busy").length;
 
   return (
-    <div style={{ padding: "20px 24px", maxWidth: 1400, margin: "0 auto" }}>
+    <div className="px-3.5 sm:px-6 py-4 sm:py-6 max-w-7xl mx-auto space-y-4">
       {/* Search & Action Bar */}
-      <div
-        style={{
-          display: "flex",
-          gap: 12,
-          alignItems: "center",
-          marginBottom: 16,
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ flex: 1, minWidth: 240, position: "relative" }}>
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        <div className="relative flex-1">
           <Search
             size={16}
             color="#8E929E"
@@ -328,13 +320,7 @@ export default function DevicesPage({ onDeviceSelect }: DevicesPageProps) {
       </div>
 
       {/* Devices Grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 16,
-        }}
-      >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
         {filtered.map((device) => (
           <div
             key={device.id}

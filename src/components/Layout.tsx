@@ -12,6 +12,9 @@ import {
   User,
   Search,
   Bell,
+  Menu,
+  X,
+  Zap,
 } from "lucide-react";
 import BottomNav from "./BottomNav";
 import GeminiAgentWidget from "./GeminiAgentWidget";
@@ -51,6 +54,7 @@ export default function Layout({ children, currentUser }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [globalSearch, setGlobalSearch] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageTitle = PAGE_TITLES[location.pathname] ?? "Dashboard";
 
   const [unreadCount, setUnreadCount] = useState<number>(() => {
@@ -87,18 +91,24 @@ export default function Layout({ children, currentUser }: LayoutProps) {
     };
   }, []);
 
+  // Close mobile drawer on route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
   const initials = currentUser?.avatar || "RR";
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (globalSearch.trim()) {
       navigate(`/tasks?q=${encodeURIComponent(globalSearch.trim())}`);
+      setGlobalSearch("");
     }
   };
 
   return (
     <div style={{ background: "#0B0C0E", minHeight: "100vh", color: "#FFFFFF" }}>
-      {/* Desktop Sidebar matching Image 1 */}
+      {/* ── Desktop Sidebar ────────────────────────────────────────── */}
       <aside
         className="hidden lg:flex"
         style={{
@@ -164,6 +174,7 @@ export default function Layout({ children, currentUser }: LayoutProps) {
             display: "flex",
             flexDirection: "column",
             gap: 4,
+            overflowY: "auto",
           }}
         >
           {NAV_LINKS.map(({ to, label, icon: Icon }) => (
@@ -205,7 +216,7 @@ export default function Layout({ children, currentUser }: LayoutProps) {
           ))}
         </nav>
 
-        {/* Bottom status matching Image 1 exact text */}
+        {/* Bottom status */}
         <div
           style={{
             marginTop: "auto",
@@ -237,9 +248,9 @@ export default function Layout({ children, currentUser }: LayoutProps) {
         </div>
       </aside>
 
-      {/* Top Header matching Image 1 */}
+      {/* ── Top Header ────────────────────────────────────────────── */}
       <header
-        className="fixed top-0 right-0 left-0 lg:left-[240px]"
+        className="fixed top-0 right-0 left-0 lg:left-[240px] px-3 sm:px-6"
         style={{
           background: "#0D0E12",
           borderBottom: "1px solid #24262E",
@@ -248,35 +259,46 @@ export default function Layout({ children, currentUser }: LayoutProps) {
           alignItems: "center",
           justifyContent: "space-between",
           height: 56,
-          paddingLeft: 24,
-          paddingRight: 24,
         }}
       >
-        {/* Page Title */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div className="flex lg:hidden items-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
-              <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
-              <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
-              <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
-            </svg>
+        {/* Left: Hamburger (Mobile) + Brand/Page Title */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="lg:hidden p-1.5 rounded-lg text-[#CBD5E1] hover:text-white hover:bg-[#18191E] transition-colors cursor-pointer"
+            aria-label="Open Navigation Menu"
+          >
+            <Menu size={20} />
+          </button>
+
+          <div
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <div className="flex lg:hidden items-center justify-center w-7 h-7 rounded-lg bg-[rgba(255,122,0,0.15)] border border-[rgba(255,122,0,0.35)]">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+                <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+                <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+                <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+              </svg>
+            </div>
+            <span className="text-base sm:text-lg font-bold text-white tracking-tight">
+              {pageTitle}
+            </span>
           </div>
-          <span style={{ fontSize: 18, fontWeight: 700, color: "#FFFFFF" }}>
-            {pageTitle}
-          </span>
         </div>
 
-        {/* Right Header items matching Image 1 */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          {/* Search cluster... input */}
-          <form onSubmit={handleSearchSubmit} style={{ position: "relative" }}>
+        {/* Right Header items: Search + Notifications + Avatar */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Responsive Search */}
+          <form onSubmit={handleSearchSubmit} className="relative">
             <Search
-              size={15}
+              size={14}
               style={{
                 color: "#64748B",
                 position: "absolute",
-                left: 12,
+                left: 10,
                 top: "50%",
                 transform: "translateY(-50%)",
                 pointerEvents: "none",
@@ -284,44 +306,20 @@ export default function Layout({ children, currentUser }: LayoutProps) {
             />
             <input
               type="text"
-              placeholder="Search cluster..."
+              placeholder="Search..."
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
-              style={{
-                height: 36,
-                width: 220,
-                borderRadius: 10,
-                background: "#18191E",
-                border: "1px solid #282A32",
-                outline: "none",
-                paddingLeft: 34,
-                paddingRight: 12,
-                fontSize: 13,
-                color: "#FFFFFF",
-                fontFamily: "inherit",
-              }}
+              className="h-9 w-24 sm:w-44 md:w-56 focus:w-36 sm:focus:w-52 md:focus:w-60 transition-all rounded-xl bg-[#18191E] border border-[#282A32] pl-8 pr-3 text-xs sm:text-sm text-white placeholder-[#64748B] outline-none focus:border-[#FF7A00]"
             />
           </form>
 
-          {/* Notifications Icon with dynamic unread count */}
+          {/* Notifications Icon */}
           <button
             onClick={() => navigate("/notifications")}
             aria-label="View notifications"
-            className="hover:border-[#FF7A00] transition-colors"
-            style={{
-              position: "relative",
-              background: "#18191E",
-              border: "1px solid #282A32",
-              cursor: "pointer",
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            className="hover:border-[#FF7A00] transition-colors relative bg-[#18191E] border border-[#282A32] cursor-pointer w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
           >
-            <Bell size={17} style={{ color: "#CBD5E1" }} />
+            <Bell size={16} style={{ color: "#CBD5E1" }} />
             {unreadCount > 0 && (
               <span
                 style={{
@@ -348,36 +346,128 @@ export default function Layout({ children, currentUser }: LayoutProps) {
             )}
           </button>
 
-          {/* User Avatar Circle with RR matching Image 1 */}
+          {/* User Avatar */}
           <div
             onClick={() => navigate("/profile")}
             role="button"
             tabIndex={0}
             title={currentUser?.fullName || "User Profile"}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #FF7A00 0%, #FF5500 100%)",
-              boxShadow: "0 2px 10px rgba(255, 122, 0, 0.35)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 13,
-              fontWeight: 700,
-              color: "#FFFFFF",
-              cursor: "pointer",
-              flexShrink: 0,
-            }}
+            className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#FF7A00] to-[#FF5500] shadow-[0_2px_10px_rgba(255,122,0,0.35)] flex items-center justify-center text-xs font-bold text-white cursor-pointer flex-shrink-0"
           >
             {initials}
           </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
+      {/* ── Mobile Slideout Navigation Drawer ──────────────────────── */}
+      {mobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-50 flex bg-black/75 backdrop-blur-sm animate-fade-in"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <div
+            className="w-[280px] max-w-[85vw] h-full bg-[#0D0E12] border-r border-[#24262E] flex flex-col p-4 shadow-2xl animate-fade-in-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-[#24262E]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[rgba(255,122,0,0.15)] border border-[rgba(255,122,0,0.35)] flex items-center justify-center">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+                    <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+                    <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+                    <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#FF7A00" strokeWidth="2" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-white">Offline Compute Grid</div>
+                  <div className="text-[11px] text-[#8E929E]">Mesh Cluster v1.0</div>
+                </div>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-1.5 rounded-lg text-[#8E929E] hover:text-white hover:bg-[#18191E]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Quick Status */}
+            <div className="my-3 p-3 rounded-xl bg-[#141519] border border-[#24262E] flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+                <span className="font-semibold text-white">8 Nodes Active</span>
+              </div>
+              <span className="text-[#FF7A00] font-mono">100% LAN</span>
+            </div>
+
+            {/* Mobile Nav Links */}
+            <nav className="flex-1 overflow-y-auto space-y-1 pr-1">
+              {NAV_LINKS.map(({ to, label, icon: Icon }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={to === "/"}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      isActive
+                        ? "bg-[rgba(255,122,0,0.15)] text-[#FF7A00] border border-[rgba(255,122,0,0.35)] font-semibold shadow-[0_0_12px_rgba(255,122,0,0.15)]"
+                        : "text-[#CBD5E1] hover:bg-[#18191E] hover:text-white"
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <Icon size={18} className={isActive ? "text-[#FF7A00]" : "text-[#8E929E]"} />
+                      <span>{label}</span>
+                    </>
+                  )}
+                </NavLink>
+              ))}
+
+              <NavLink
+                to="/notifications"
+                onClick={() => setMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    isActive
+                      ? "bg-[rgba(255,122,0,0.15)] text-[#FF7A00] border border-[rgba(255,122,0,0.35)] font-semibold"
+                      : "text-[#CBD5E1] hover:bg-[#18191E] hover:text-white"
+                  }`
+                }
+              >
+                <div className="flex items-center gap-3">
+                  <Bell size={18} className="text-[#8E929E]" />
+                  <span>Notifications</span>
+                </div>
+                {unreadCount > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-[#FF7A00] text-white text-[10px] font-bold">
+                    {unreadCount}
+                  </span>
+                )}
+              </NavLink>
+            </nav>
+
+            {/* Mobile Action Button */}
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigate("/create-task");
+              }}
+              className="mt-3 w-full btn-primary py-2.5 text-xs flex items-center justify-center gap-2"
+            >
+              <PlusCircle size={15} />
+              <span>Dispatch New Task</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Main Content Area (padding-bottom prevents bottom nav overlap) ── */}
       <main
-        className="pt-[56px] lg:pl-[240px] pb-16 lg:pb-0"
+        className="pt-[56px] lg:pl-[240px] pb-24 lg:pb-8"
         style={{ minHeight: "100vh", backgroundColor: "#0B0C0E" }}
       >
         {children}

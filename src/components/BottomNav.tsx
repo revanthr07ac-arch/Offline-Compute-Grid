@@ -18,11 +18,14 @@ export default function BottomNav() {
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: 50,
-        background: "#0D0E12",
+        zIndex: 40,
+        background: "rgba(13, 14, 18, 0.94)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
         borderTop: "1px solid #24262E",
         display: "flex",
         paddingBottom: "env(safe-area-inset-bottom)",
+        boxShadow: "0 -4px 20px rgba(0, 0, 0, 0.4)",
       }}
     >
       {TABS.map(({ to, label, icon: Icon }) => (
@@ -41,21 +44,23 @@ export default function BottomNav() {
             textDecoration: "none",
             color: isActive ? "#FF7A00" : "#8E929E",
             fontSize: 10,
-            fontWeight: isActive ? 600 : 400,
+            fontWeight: isActive ? 600 : 500,
+            transition: "all 0.15s ease",
           })}
         >
           {({ isActive }: { isActive: boolean }) => (
             <>
               <div
                 style={{
-                  width: 32,
+                  width: 36,
                   height: 26,
                   borderRadius: 8,
-                  background: isActive ? "rgba(255, 122, 0, 0.15)" : "transparent",
+                  background: isActive ? "rgba(255, 122, 0, 0.18)" : "transparent",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  transition: "background 0.15s",
+                  transition: "all 0.15s ease",
+                  boxShadow: isActive ? "0 0 12px rgba(255, 122, 0, 0.25)" : "none",
                 }}
               >
                 <Icon
@@ -66,7 +71,7 @@ export default function BottomNav() {
                   }}
                 />
               </div>
-              <span>{label}</span>
+              <span style={{ letterSpacing: "-0.1px" }}>{label}</span>
             </>
           )}
         </NavLink>

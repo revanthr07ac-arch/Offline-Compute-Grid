@@ -4,26 +4,45 @@ import fs from 'fs';
 import path from 'path';
 import { devices, tasks, DeviceType, Task } from './data';
 
-// Load local .env configuration
+// Load local .env configuration from candidate paths
 try {
-  const envPath = path.resolve(__dirname, '.env');
-  if (fs.existsSync(envPath)) {
-    const lines = fs.readFileSync(envPath, 'utf-8').split('\n');
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith('#')) {
-        const [k, ...v] = trimmed.split('=');
-        if (k && v.length) process.env[k.trim()] = v.join('=').trim();
+  const envCandidates = [
+    path.resolve(process.cwd(), '.env'),
+    path.resolve(__dirname, '.env'),
+    path.resolve(__dirname, '../.env'),
+    path.resolve(__dirname, '../../.env'),
+  ];
+  for (const envPath of envCandidates) {
+    if (fs.existsSync(envPath)) {
+      const lines = fs.readFileSync(envPath, 'utf-8').split('\n');
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#')) {
+          const [k, ...v] = trimmed.split('=');
+          if (k && v.length && !process.env[k.trim()]) {
+            process.env[k.trim()] = v.join('=').trim();
+          }
+        }
       }
     }
   }
 } catch {}
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+// Health check endpoint for cloud hosting monitoring
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
 
 // In-memory data store
 let currentDevices = [...devices];
@@ -175,6 +194,31 @@ setInterval(() => {
     }
   });
 }, 3000);
+
+// Static frontend delivery & client-side routing fallback for cloud deployment
+const candidateDistPaths = [
+  path.resolve(process.cwd(), 'dist'),
+  path.resolve(__dirname, '../dist'),
+  path.resolve(__dirname, '../../dist'),
+];
+const distPath = candidateDistPaths.find(p => fs.existsSync(p));
+
+if (distPath) {
+  console.log(`[Production Grid] Serving static UI bundle from: ${distPath}`);
+  app.use(express.static(distPath));
+
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    const indexHtml = path.join(distPath, 'index.html');
+    if (fs.existsSync(indexHtml)) {
+      res.sendFile(indexHtml);
+    } else {
+      next();
+    }
+  });
+}
 
 app.listen(port, () => {
   console.log(`Backend server running on http://localhost:${port}`);
